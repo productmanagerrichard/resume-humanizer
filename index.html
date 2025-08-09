@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -204,13 +203,8 @@
         }
 
         @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .results {
@@ -277,22 +271,21 @@
             .main-content {
                 padding: 20px;
             }
-
+            
             .header {
                 padding: 30px 20px;
             }
-
+            
             .header h1 {
                 font-size: 2rem;
             }
-
+            
             .step {
                 padding: 20px;
             }
         }
     </style>
 </head>
-
 <body>
     <div class="container">
         <div class="header">
@@ -342,7 +335,7 @@
                     <div class="step-title">Humanize Your Resume</div>
                 </div>
                 <button class="btn" id="processBtn" disabled>🚀 Start Humanizing</button>
-
+                
                 <div class="processing" id="processing">
                     <div class="spinner"></div>
                     <h3>Processing your resume...</h3>
@@ -413,42 +406,51 @@
         function handleFile(file) {
             uploadedFile = file;
             fileType = file.type;
-
+            
             fileInfo.innerHTML = `
                 <strong>📁 ${file.name}</strong><br>
                 Size: ${(file.size / 1024).toFixed(1)} KB<br>
                 Type: ${file.type || 'Unknown'}
             `;
             fileInfo.style.display = 'block';
-
+            
             // Enable next steps
             document.getElementById('step2').classList.add('active');
             processBtn.disabled = false;
-
+            
             // Read file content
             readFileContent(file);
         }
 
-        function readFileContent(file) {
+        async function readFileContent(file) {
             const reader = new FileReader();
-
+            
             if (file.type.includes('text') || file.name.endsWith('.txt')) {
                 reader.onload = (e) => {
                     originalContent = e.target.result;
                     documentStructure = { type: 'text', content: originalContent };
+                    console.log('Text content loaded:', originalContent.substring(0, 200) + '...');
                 };
                 reader.readAsText(file);
             } else if (file.type.includes('pdf') || file.name.endsWith('.pdf')) {
+                // For PDF files, we'll extract text using a simple approach
+                // In production, you'd want to use a more robust PDF text extraction library
                 reader.onload = async (e) => {
                     try {
-                        // Store original PDF for modification
                         originalDocument = new Uint8Array(e.target.result);
-                        // For demo - in real app you'd use PDF-lib or similar to extract text
-                        originalContent = "John Doe\nExperienced software engineer with expertise in developing scalable applications and implementing cutting-edge technologies. Proven track record of delivering high-quality solutions and collaborating effectively with cross-functional teams.\n\nExperience:\nSoftware Engineer | TechCorp | 2020-2023\n• Developed and maintained web applications using React and Node.js\n• Collaborated with product managers to define requirements\n• Implemented automated testing frameworks\n• Optimized application performance";
+                        
+                        // Convert PDF to text (simplified approach)
+                        // Note: This is a basic implementation. For better PDF text extraction,
+                        // consider using PDF.js or similar libraries
+                        const text = await extractTextFromPDF(e.target.result);
+                        originalContent = text || "Unable to extract text from PDF. Please try uploading as Word or text file.";
+                        
                         documentStructure = { type: 'pdf', originalBytes: originalDocument };
+                        console.log('PDF content loaded:', originalContent.substring(0, 200) + '...');
                     } catch (err) {
                         console.error('Error reading PDF:', err);
-                        originalContent = "Sample resume content for demonstration purposes.";
+                        originalContent = "Error reading PDF file. Please try uploading as Word or text file.";
+                        documentStructure = { type: 'text', content: originalContent };
                     }
                 };
                 reader.readAsArrayBuffer(file);
@@ -457,20 +459,21 @@
                     try {
                         const arrayBuffer = e.target.result;
                         originalDocument = arrayBuffer;
-
+                        
                         // Extract text while preserving structure
-                        const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+                        const result = await mammoth.extractRawText({arrayBuffer: arrayBuffer});
                         originalContent = result.value;
-
+                        
                         // Store document structure for reconstruction
                         documentStructure = {
                             type: 'docx',
                             originalBytes: arrayBuffer,
                             content: originalContent
                         };
+                        console.log('Word content loaded:', originalContent.substring(0, 200) + '...');
                     } catch (err) {
                         console.error('Error reading Word document:', err);
-                        originalContent = "Sample resume content for demonstration purposes.";
+                        originalContent = "Error reading Word document. Please try uploading as text file.";
                         documentStructure = { type: 'text', content: originalContent };
                     }
                 };
@@ -479,27 +482,54 @@
                 reader.onload = (e) => {
                     try {
                         const data = new Uint8Array(e.target.result);
-                        const workbook = XLSX.read(data, { type: 'array' });
+                        const workbook = XLSX.read(data, {type: 'array'});
                         originalDocument = workbook;
-
+                        
                         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                         originalContent = XLSX.utils.sheet_to_txt(firstSheet);
-
+                        
                         documentStructure = {
                             type: 'excel',
                             workbook: workbook,
                             sheetName: workbook.SheetNames[0]
                         };
+                        console.log('Excel content loaded:', originalContent.substring(0, 200) + '...');
                     } catch (err) {
                         console.error('Error reading Excel file:', err);
-                        originalContent = "Sample resume content for demonstration purposes.";
+                        originalContent = "Error reading Excel file. Please try uploading as text file.";
                         documentStructure = { type: 'text', content: originalContent };
                     }
                 };
                 reader.readAsArrayBuffer(file);
             } else {
-                originalContent = "Sample resume content for demonstration purposes.";
-                documentStructure = { type: 'text', content: originalContent };
+                // Try to read as text anyway
+                reader.onload = (e) => {
+                    originalContent = e.target.result || "Unsupported file format. Please upload PDF, Word, Excel, or text files.";
+                    documentStructure = { type: 'text', content: originalContent };
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        // Simple PDF text extraction function
+        async function extractTextFromPDF(arrayBuffer) {
+            // This is a very basic PDF text extraction
+            // For production use, implement proper PDF.js integration
+            try {
+                const uint8Array = new Uint8Array(arrayBuffer);
+                const text = String.fromCharCode.apply(null, uint8Array);
+                
+                // Very basic text extraction - look for readable text patterns
+                const textMatches = text.match(/\(([^)]+)\)/g);
+                if (textMatches) {
+                    return textMatches.map(match => match.slice(1, -1)).join(' ').replace(/\s+/g, ' ');
+                }
+                
+                // Fallback: Return a message asking for different format
+                return "PDF text extraction is limited. For best results, please upload your resume as a Word document (.docx) or text file.";
+            } catch (err) {
+                console.error('PDF extraction error:', err);
+                return "Unable to extract text from PDF. Please try uploading as Word or text file.";
             }
         }
 
@@ -508,88 +538,134 @@
         }
 
         function processResume() {
+            if (!originalContent || originalContent.trim() === '') {
+                alert('Please upload a resume file first');
+                return;
+            }
+
             document.getElementById('step3').classList.add('active');
             document.getElementById('processing').style.display = 'block';
             processBtn.style.display = 'none';
 
-            // Simulate processing time
+            // Add a small delay to ensure the file is fully read
             setTimeout(() => {
+                console.log('Processing resume with content:', originalContent.substring(0, 100) + '...');
                 humanizeContent();
                 showResults();
-            }, 3000);
+            }, 1500);
         }
 
         function humanizeContent() {
             changes = [];
             let content = originalContent;
-
-            // AI-to-human transformations
+            
+            console.log('Starting humanization with:', content.substring(0, 100) + '...');
+            
+            // AI-to-human transformations with case-insensitive matching
             const transformations = [
                 {
-                    pattern: /proven track record/gi,
+                    pattern: /\bproven track record\b/gi,
                     replacement: 'solid experience',
                     type: 'AI phrase removal'
                 },
                 {
-                    pattern: /cutting-edge technologies/gi,
+                    pattern: /\bcutting-edge technologies\b/gi,
                     replacement: 'modern tools',
                     type: 'AI phrase removal'
                 },
                 {
-                    pattern: /cross-functional teams/gi,
+                    pattern: /\bcross-functional teams\b/gi,
                     replacement: 'different departments',
                     type: 'AI phrase removal'
                 },
                 {
-                    pattern: /scalable applications/gi,
+                    pattern: /\bscalable applications\b/gi,
                     replacement: 'applications that can grow',
                     type: 'AI phrase removal'
                 },
                 {
-                    pattern: /leveraged/gi,
+                    pattern: /\bleveraged\b/gi,
                     replacement: 'used',
                     type: 'AI phrase removal'
                 },
                 {
-                    pattern: /spearheaded/gi,
+                    pattern: /\bspearheaded\b/gi,
                     replacement: 'led',
                     type: 'AI phrase removal'
                 },
                 {
-                    pattern: /collaborated effectively/gi,
+                    pattern: /\bcollaborated effectively\b/gi,
                     replacement: 'worked well',
                     type: 'AI phrase removal'
                 },
                 {
-                    pattern: /implemented/gi,
+                    pattern: /\bimplemented\b/gi,
                     replacement: 'built',
                     type: 'Natural language'
                 },
                 {
-                    pattern: /utilized/gi,
+                    pattern: /\butilized\b/gi,
                     replacement: 'used',
                     type: 'Natural language'
                 },
                 {
-                    pattern: /facilitated/gi,
+                    pattern: /\bfacilitated\b/gi,
                     replacement: 'helped with',
                     type: 'Natural language'
+                },
+                {
+                    pattern: /\bstakeholders\b/gi,
+                    replacement: 'team members',
+                    type: 'AI phrase removal'
+                },
+                {
+                    pattern: /\bsynergies\b/gi,
+                    replacement: 'teamwork',
+                    type: 'AI phrase removal'
+                },
+                {
+                    pattern: /\boptimized\b/gi,
+                    replacement: 'improved',
+                    type: 'Natural language'
+                },
+                {
+                    pattern: /\bstreamlined\b/gi,
+                    replacement: 'simplified',
+                    type: 'Natural language'
+                },
+                {
+                    pattern: /\benhanced\b/gi,
+                    replacement: 'made better',
+                    type: 'Natural language'
+                },
+                {
+                    pattern: /\bdrove results\b/gi,
+                    replacement: 'got results',
+                    type: 'AI phrase removal'
+                },
+                {
+                    pattern: /\bkey performance indicators\b/gi,
+                    replacement: 'important metrics',
+                    type: 'AI phrase removal'
+                },
+                {
+                    pattern: /\bbest practices\b/gi,
+                    replacement: 'good methods',
+                    type: 'AI phrase removal'
                 }
             ];
 
-            // Apply transformations
+            // Apply transformations and track changes
             transformations.forEach(transform => {
-                const matches = content.match(transform.pattern);
-                if (matches) {
-                    matches.forEach(match => {
-                        changes.push({
-                            before: match,
-                            after: transform.replacement,
-                            type: transform.type
-                        });
+                const originalContent = content;
+                content = content.replace(transform.pattern, (match) => {
+                    changes.push({
+                        before: match,
+                        after: transform.replacement,
+                        type: transform.type
                     });
-                    content = content.replace(transform.pattern, transform.replacement);
-                }
+                    return transform.replacement;
+                });
             });
 
             // Add strategic typos to non-essential content
@@ -599,15 +675,20 @@
             }
 
             humanizedContent = content;
+            console.log('Humanization complete. Changes made:', changes.length);
+            console.log('Final content preview:', humanizedContent.substring(0, 200) + '...');
         }
 
         function addTypos(content, count) {
             const typoPatterns = [
-                { from: 'and', to: 'adn' },
-                { from: 'the', to: 'teh' },
-                { from: 'experience', to: 'experiance' },
-                { from: 'development', to: 'developement' },
-                { from: 'management', to: 'managment' }
+                { from: /\band\b/g, to: 'adn', original: 'and' },
+                { from: /\bthe\b/g, to: 'teh', original: 'the' },
+                { from: /\bexperience\b/gi, to: 'experiance', original: 'experience' },
+                { from: /\bdevelopment\b/gi, to: 'developement', original: 'development' },
+                { from: /\bmanagement\b/gi, to: 'managment', original: 'management' },
+                { from: /\benvironment\b/gi, to: 'enviroment', original: 'environment' },
+                { from: /\bresponsible\b/gi, to: 'responsable', original: 'responsible' },
+                { from: /\bsuccessful\b/gi, to: 'successfull', original: 'successful' }
             ];
 
             let result = content;
@@ -615,25 +696,34 @@
 
             // Only add typos to descriptive text, not contact info, dates, or URLs
             const lines = result.split('\n');
-            const safeLines = lines.filter(line =>
-                !line.includes('@') &&
-                !line.includes('http') &&
-                !line.match(/\d{4}/) &&
+            const safeLines = lines.filter(line => 
+                !line.includes('@') && 
+                !line.includes('http') && 
+                !line.match(/\d{4}/) && 
                 !line.includes('|') &&
+                !line.match(/^\s*[A-Z][a-z]+\s+[A-Z][a-z]+\s*$/) && // Skip name lines
                 line.length > 20
             );
 
-            while (addedTypos < count && safeLines.length > 0) {
-                const randomLine = safeLines[Math.floor(Math.random() * safeLines.length)];
-                const randomTypo = typoPatterns[Math.floor(Math.random() * typoPatterns.length)];
-
-                if (randomLine.includes(randomTypo.from)) {
-                    result = result.replace(randomLine, randomLine.replace(randomTypo.from, randomTypo.to));
+            // Shuffle typo patterns and lines for randomness
+            const shuffledPatterns = [...typoPatterns].sort(() => Math.random() - 0.5);
+            
+            for (let i = 0; i < shuffledPatterns.length && addedTypos < count; i++) {
+                const typo = shuffledPatterns[i];
+                
+                // Find a safe line that contains this word
+                const targetLine = safeLines.find(line => typo.from.test(line));
+                
+                if (targetLine) {
+                    const updatedLine = targetLine.replace(typo.from, typo.to);
+                    result = result.replace(targetLine, updatedLine);
+                    
                     changes.push({
-                        before: randomTypo.from,
-                        after: randomTypo.to,
+                        before: typo.original,
+                        after: typo.to,
                         type: 'Authenticity typo'
                     });
+                    
                     addedTypos++;
                 }
             }
@@ -707,11 +797,11 @@
                 // Create a new document with the humanized content
                 // Note: This is a simplified version. For full Word format preservation,
                 // you'd need a more sophisticated library or server-side processing
-
+                
                 const doc = new docx.Document({
                     sections: [{
                         properties: {},
-                        children: humanizedContent.split('\n\n').map(paragraph =>
+                        children: humanizedContent.split('\n\n').map(paragraph => 
                             new docx.Paragraph({
                                 children: [new docx.TextRun(paragraph)]
                             })
@@ -736,18 +826,18 @@
             try {
                 // Create new workbook with humanized content
                 const newWorkbook = XLSX.utils.book_new();
-
+                
                 // Convert humanized text back to sheet format
                 const lines = humanizedContent.split('\n').filter(line => line.trim());
                 const sheetData = lines.map(line => [line]);
-
+                
                 const newSheet = XLSX.utils.aoa_to_sheet(sheetData);
                 XLSX.utils.book_append_sheet(newWorkbook, newSheet, 'Resume');
-
+                
                 // Write to binary
                 const wbout = XLSX.write(newWorkbook, { bookType: extension, type: 'array' });
                 const blob = new Blob([wbout], { type: 'application/octet-stream' });
-
+                
                 downloadBlob(blob, `${baseName}_humanized.${extension}`);
             } catch (err) {
                 console.error('Error creating Excel file:', err);
@@ -760,11 +850,11 @@
                 // Create new PDF with humanized content
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
-
+                
                 // Split content into lines that fit the page
                 const lines = doc.splitTextToSize(humanizedContent, 180);
                 let y = 20;
-
+                
                 lines.forEach(line => {
                     if (y > 280) { // Start new page if needed
                         doc.addPage();
@@ -773,7 +863,7 @@
                     doc.text(line, 20, y);
                     y += 7;
                 });
-
+                
                 // Download the PDF
                 doc.save(`${baseName}_humanized.pdf`);
             } catch (err) {
@@ -794,5 +884,4 @@
         }
     </script>
 </body>
-
 </html>
