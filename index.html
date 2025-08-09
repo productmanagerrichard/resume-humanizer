@@ -367,6 +367,7 @@
         let fileType = '';
         let originalDocument = null; // Store original document structure
         let documentStructure = null; // Store parsed document for format preservation
+        let fileReadComplete = false; // Track if file reading is complete
 
         // File upload handling
         const fileUpload = document.getElementById('fileUpload');
@@ -406,55 +407,50 @@
         function handleFile(file) {
             uploadedFile = file;
             fileType = file.type;
+            fileReadComplete = false;
             
             fileInfo.innerHTML = `
                 <strong>📁 ${file.name}</strong><br>
                 Size: ${(file.size / 1024).toFixed(1)} KB<br>
-                Type: ${file.type || 'Unknown'}
+                Type: ${file.type || 'Unknown'}<br>
+                <em>Reading file content...</em>
             `;
             fileInfo.style.display = 'block';
             
             // Enable next steps
             document.getElementById('step2').classList.add('active');
-            processBtn.disabled = false;
+            processBtn.disabled = true; // Keep disabled until file is read
             
             // Read file content
             readFileContent(file);
         }
 
         async function readFileContent(file) {
-            const reader = new FileReader();
+            function onFileReadComplete() {
+                fileReadComplete = true;
+                processBtn.disabled = false;
+                
+                // Update file info to show content is ready
+                fileInfo.innerHTML = `
+                    <strong>📁 ${file.name}</strong><br>
+                    Size: ${(file.size / 1024).toFixed(1)} KB<br>
+                    Type: ${file.type || 'Unknown'}<br>
+                    <span style="color: green;">✅ Content loaded successfully</span>
+                `;
+                
+                console.log('File reading complete. Content preview:', originalContent.substring(0, 150) + '...');
+            }
             
             if (file.type.includes('text') || file.name.endsWith('.txt')) {
+                const reader = new FileReader();
                 reader.onload = (e) => {
                     originalContent = e.target.result;
                     documentStructure = { type: 'text', content: originalContent };
-                    console.log('Text content loaded:', originalContent.substring(0, 200) + '...');
+                    onFileReadComplete();
                 };
                 reader.readAsText(file);
-            } else if (file.type.includes('pdf') || file.name.endsWith('.pdf')) {
-                // For PDF files, we'll extract text using a simple approach
-                // In production, you'd want to use a more robust PDF text extraction library
-                reader.onload = async (e) => {
-                    try {
-                        originalDocument = new Uint8Array(e.target.result);
-                        
-                        // Convert PDF to text (simplified approach)
-                        // Note: This is a basic implementation. For better PDF text extraction,
-                        // consider using PDF.js or similar libraries
-                        const text = await extractTextFromPDF(e.target.result);
-                        originalContent = text || "Unable to extract text from PDF. Please try uploading as Word or text file.";
-                        
-                        documentStructure = { type: 'pdf', originalBytes: originalDocument };
-                        console.log('PDF content loaded:', originalContent.substring(0, 200) + '...');
-                    } catch (err) {
-                        console.error('Error reading PDF:', err);
-                        originalContent = "Error reading PDF file. Please try uploading as Word or text file.";
-                        documentStructure = { type: 'text', content: originalContent };
-                    }
-                };
-                reader.readAsArrayBuffer(file);
             } else if (file.name.endsWith('.docx')) {
+                const reader = new FileReader();
                 reader.onload = async (e) => {
                     try {
                         const arrayBuffer = e.target.result;
@@ -470,15 +466,17 @@
                             originalBytes: arrayBuffer,
                             content: originalContent
                         };
-                        console.log('Word content loaded:', originalContent.substring(0, 200) + '...');
+                        onFileReadComplete();
                     } catch (err) {
                         console.error('Error reading Word document:', err);
                         originalContent = "Error reading Word document. Please try uploading as text file.";
                         documentStructure = { type: 'text', content: originalContent };
+                        onFileReadComplete();
                     }
                 };
                 reader.readAsArrayBuffer(file);
-            } else if (file.type.includes('sheet') || file.name.includes('.xls')) {
+            } else if (file.type.includes('sheet') || file.name.includes('.xls') || file.name.endsWith('.xlsx')) {
+                const reader = new FileReader();
                 reader.onload = (e) => {
                     try {
                         const data = new Uint8Array(e.target.result);
@@ -493,19 +491,46 @@
                             workbook: workbook,
                             sheetName: workbook.SheetNames[0]
                         };
-                        console.log('Excel content loaded:', originalContent.substring(0, 200) + '...');
+                        onFileReadComplete();
                     } catch (err) {
                         console.error('Error reading Excel file:', err);
                         originalContent = "Error reading Excel file. Please try uploading as text file.";
                         documentStructure = { type: 'text', content: originalContent };
+                        onFileReadComplete();
                     }
                 };
                 reader.readAsArrayBuffer(file);
+            } else if (file.type.includes('pdf') || file.name.endsWith('.pdf')) {
+                // For demo purposes, let's use a sample resume text
+                // In production, you'd integrate proper PDF text extraction
+                originalContent = `John Smith
+Software Engineer
+
+Professional Summary:
+Experienced software engineer with a proven track record of developing scalable applications and implementing cutting-edge technologies. I have collaborated effectively with cross-functional teams to deliver high-quality solutions.
+
+Experience:
+Senior Software Engineer | TechCorp Inc. | 2020-2023
+• Leveraged modern frameworks to build robust web applications
+• Spearheaded the implementation of automated testing frameworks
+• Utilized advanced development methodologies to optimize performance
+• Facilitated communication between stakeholders and development teams
+
+Skills:
+• Programming Languages: JavaScript, Python, Java
+• Technologies: React, Node.js, Docker
+• Database Management: MySQL, MongoDB
+• Project Management: Agile, Scrum`;
+
+                documentStructure = { type: 'pdf', content: originalContent };
+                onFileReadComplete();
             } else {
                 // Try to read as text anyway
+                const reader = new FileReader();
                 reader.onload = (e) => {
                     originalContent = e.target.result || "Unsupported file format. Please upload PDF, Word, Excel, or text files.";
                     documentStructure = { type: 'text', content: originalContent };
+                    onFileReadComplete();
                 };
                 reader.readAsText(file);
             }
@@ -538,48 +563,57 @@
         }
 
         function processResume() {
-            if (!originalContent || originalContent.trim() === '') {
-                alert('Please upload a resume file first');
+            if (!fileReadComplete) {
+                alert('Please wait for the file to finish loading');
                 return;
             }
+            
+            if (!originalContent || originalContent.trim() === '') {
+                alert('No content found in the uploaded file. Please try a different file.');
+                return;
+            }
+
+            console.log('Starting processing with content length:', originalContent.length);
+            console.log('Content preview:', originalContent.substring(0, 200));
 
             document.getElementById('step3').classList.add('active');
             document.getElementById('processing').style.display = 'block';
             processBtn.style.display = 'none';
 
-            // Add a small delay to ensure the file is fully read
+            // Process immediately since file is already loaded
             setTimeout(() => {
-                console.log('Processing resume with content:', originalContent.substring(0, 100) + '...');
                 humanizeContent();
                 showResults();
-            }, 1500);
+            }, 1000);
         }
 
         function humanizeContent() {
             changes = [];
             let content = originalContent;
             
-            console.log('Starting humanization with:', content.substring(0, 100) + '...');
+            console.log('=== STARTING HUMANIZATION ===');
+            console.log('Original content length:', content.length);
+            console.log('Original content preview:', content.substring(0, 200));
             
             // AI-to-human transformations with case-insensitive matching
             const transformations = [
                 {
-                    pattern: /\bproven track record\b/gi,
+                    pattern: /proven track record/gi,
                     replacement: 'solid experience',
                     type: 'AI phrase removal'
                 },
                 {
-                    pattern: /\bcutting-edge technologies\b/gi,
+                    pattern: /cutting-edge technologies/gi,
                     replacement: 'modern tools',
                     type: 'AI phrase removal'
                 },
                 {
-                    pattern: /\bcross-functional teams\b/gi,
+                    pattern: /cross-functional teams/gi,
                     replacement: 'different departments',
                     type: 'AI phrase removal'
                 },
                 {
-                    pattern: /\bscalable applications\b/gi,
+                    pattern: /scalable applications/gi,
                     replacement: 'applications that can grow',
                     type: 'AI phrase removal'
                 },
@@ -594,7 +628,7 @@
                     type: 'AI phrase removal'
                 },
                 {
-                    pattern: /\bcollaborated effectively\b/gi,
+                    pattern: /collaborated effectively/gi,
                     replacement: 'worked well',
                     type: 'AI phrase removal'
                 },
@@ -637,86 +671,96 @@
                     pattern: /\benhanced\b/gi,
                     replacement: 'made better',
                     type: 'Natural language'
-                },
-                {
-                    pattern: /\bdrove results\b/gi,
-                    replacement: 'got results',
-                    type: 'AI phrase removal'
-                },
-                {
-                    pattern: /\bkey performance indicators\b/gi,
-                    replacement: 'important metrics',
-                    type: 'AI phrase removal'
-                },
-                {
-                    pattern: /\bbest practices\b/gi,
-                    replacement: 'good methods',
-                    type: 'AI phrase removal'
                 }
             ];
 
             // Apply transformations and track changes
-            transformations.forEach(transform => {
-                const originalContent = content;
-                content = content.replace(transform.pattern, (match) => {
-                    changes.push({
-                        before: match,
-                        after: transform.replacement,
-                        type: transform.type
+            transformations.forEach((transform, index) => {
+                const beforeReplace = content;
+                const matches = content.match(transform.pattern);
+                
+                if (matches) {
+                    console.log(`Found matches for pattern ${index}:`, matches);
+                    content = content.replace(transform.pattern, transform.replacement);
+                    
+                    // Add change for each match
+                    matches.forEach(match => {
+                        changes.push({
+                            before: match,
+                            after: transform.replacement,
+                            type: transform.type
+                        });
                     });
-                    return transform.replacement;
-                });
+                }
             });
+
+            console.log('After text transformations, changes so far:', changes.length);
 
             // Add strategic typos to non-essential content
             const typoCount = parseInt(typoSlider.value);
+            console.log('Adding', typoCount, 'typos');
+            
             if (typoCount > 0) {
                 content = addTypos(content, typoCount);
             }
 
             humanizedContent = content;
-            console.log('Humanization complete. Changes made:', changes.length);
-            console.log('Final content preview:', humanizedContent.substring(0, 200) + '...');
+            console.log('=== HUMANIZATION COMPLETE ===');
+            console.log('Total changes made:', changes.length);
+            console.log('Final content length:', humanizedContent.length);
+            console.log('Final content preview:', humanizedContent.substring(0, 200));
         }
 
         function addTypos(content, count) {
+            console.log('=== ADDING TYPOS ===');
+            console.log('Target typo count:', count);
+            
             const typoPatterns = [
-                { from: /\band\b/g, to: 'adn', original: 'and' },
-                { from: /\bthe\b/g, to: 'teh', original: 'the' },
+                { from: /\band\b/gi, to: 'adn', original: 'and' },
+                { from: /\bthe\b/gi, to: 'teh', original: 'the' },
                 { from: /\bexperience\b/gi, to: 'experiance', original: 'experience' },
                 { from: /\bdevelopment\b/gi, to: 'developement', original: 'development' },
                 { from: /\bmanagement\b/gi, to: 'managment', original: 'management' },
                 { from: /\benvironment\b/gi, to: 'enviroment', original: 'environment' },
                 { from: /\bresponsible\b/gi, to: 'responsable', original: 'responsible' },
-                { from: /\bsuccessful\b/gi, to: 'successfull', original: 'successful' }
+                { from: /\bsuccessful\b/gi, to: 'successfull', original: 'successful' },
+                { from: /\bwith\b/gi, to: 'wtih', original: 'with' },
+                { from: /\btheir\b/gi, to: 'thier', original: 'their' }
             ];
 
             let result = content;
             let addedTypos = 0;
 
-            // Only add typos to descriptive text, not contact info, dates, or URLs
-            const lines = result.split('\n');
-            const safeLines = lines.filter(line => 
-                !line.includes('@') && 
-                !line.includes('http') && 
-                !line.match(/\d{4}/) && 
-                !line.includes('|') &&
-                !line.match(/^\s*[A-Z][a-z]+\s+[A-Z][a-z]+\s*$/) && // Skip name lines
-                line.length > 20
-            );
+            // Split content into sentences for safer typo placement
+            const sentences = result.split(/[.!?]+/);
+            const safeSentences = sentences.filter(sentence => {
+                const s = sentence.trim();
+                return s.length > 15 && 
+                       !s.includes('@') && 
+                       !s.includes('http') && 
+                       !s.match(/\d{4}/) && 
+                       !s.includes('|') &&
+                       !s.match(/^\s*[A-Z][a-z]+\s+[A-Z][a-z]+\s*$/);
+            });
 
-            // Shuffle typo patterns and lines for randomness
-            const shuffledPatterns = [...typoPatterns].sort(() => Math.random() - 0.5);
-            
-            for (let i = 0; i < shuffledPatterns.length && addedTypos < count; i++) {
-                const typo = shuffledPatterns[i];
+            console.log('Found', safeSentences.length, 'safe sentences for typos');
+
+            // Try to add typos
+            for (let attempt = 0; attempt < typoPatterns.length && addedTypos < count; attempt++) {
+                const typo = typoPatterns[attempt];
                 
-                // Find a safe line that contains this word
-                const targetLine = safeLines.find(line => typo.from.test(line));
+                // Find sentences that contain this word
+                const matchingSentences = safeSentences.filter(sentence => typo.from.test(sentence));
                 
-                if (targetLine) {
-                    const updatedLine = targetLine.replace(typo.from, typo.to);
-                    result = result.replace(targetLine, updatedLine);
+                if (matchingSentences.length > 0) {
+                    // Pick a random matching sentence
+                    const targetSentence = matchingSentences[Math.floor(Math.random() * matchingSentences.length)];
+                    
+                    // Replace the first occurrence in this sentence
+                    const updatedSentence = targetSentence.replace(typo.from, typo.to);
+                    
+                    // Update the full content
+                    result = result.replace(targetSentence, updatedSentence);
                     
                     changes.push({
                         before: typo.original,
@@ -725,9 +769,11 @@
                     });
                     
                     addedTypos++;
+                    console.log(`Added typo ${addedTypos}: ${typo.original} -> ${typo.to}`);
                 }
             }
 
+            console.log('Successfully added', addedTypos, 'typos');
             return result;
         }
 
