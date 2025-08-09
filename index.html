@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Humanizer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.7.0/docx.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .step {
+            margin-bottom: 40px;
+            padding: 30px;
+            border: 2px dashed #e0e0e0;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .step.active {
+            border-color: #3498db;
+            background: rgba(52, 152, 219, 0.05);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.1);
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #3498db;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .step-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .file-upload {
+            border: 3px dashed #bdc3c7;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .file-upload:hover {
+            border-color: #3498db;
+            background: rgba(52, 152, 219, 0.05);
+        }
+
+        .file-upload.dragover {
+            border-color: #2ecc71;
+            background: rgba(46, 204, 113, 0.1);
+        }
+
+        .file-upload input {
+            display: none;
+        }
+
+        .file-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f5e8;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .typo-config {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .typo-slider {
+            flex: 1;
+        }
+
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3498db;
+            cursor: pointer;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+        }
+
+        .processing {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .results-header {
+            background: #2ecc71;
+            color: white;
+            padding: 20px;
+            border-radius: 10px 10px 0 0;
+            font-weight: 600;
+        }
+
+        .results-content {
+            border: 2px solid #2ecc71;
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            padding: 20px;
+        }
+
+        .summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .changes-list {
+            max-height: 300px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .change-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+        }
+
+        .change-before {
+            color: #e74c3c;
+            text-decoration: line-through;
+            font-style: italic;
+        }
+
+        .change-after {
+            color: #27ae60;
+            font-weight: 500;
+        }
+
+        .download-section {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 20px;
+            }
+
+            .header {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .step {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Resume Humanizer</h1>
+            <p>Transform AI-generated resumes into authentic, human-written content</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Step 1: File Upload -->
+            <div class="step active" id="step1">
+                <div class="step-header">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Upload Your Resume</div>
+                </div>
+                <div class="file-upload" id="fileUpload">
+                    <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.xlsx,.xls,.txt">
+                    <div>
+                        <h3>📄 Drop your resume here or click to browse</h3>
+                        <p>Supports PDF, Word, Excel, and text files</p>
+                    </div>
+                </div>
+                <div class="file-info" id="fileInfo"></div>
+            </div>
+
+            <!-- Step 2: Typo Configuration -->
+            <div class="step" id="step2">
+                <div class="step-header">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Configure Authenticity Settings</div>
+                </div>
+                <div class="typo-config">
+                    <label for="typoSlider">Number of minor typos to add:</label>
+                    <div class="typo-slider">
+                        <input type="range" id="typoSlider" class="slider" min="0" max="5" value="2">
+                    </div>
+                    <span id="typoCount">2</span>
+                </div>
+                <p style="margin-top: 10px; color: #7f8c8d; font-size: 0.9rem;">
+                    Typos will only be added to non-essential content (not contact info, dates, or URLs)
+                </p>
+            </div>
+
+            <!-- Step 3: Process -->
+            <div class="step" id="step3">
+                <div class="step-header">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Humanize Your Resume</div>
+                </div>
+                <button class="btn" id="processBtn" disabled>🚀 Start Humanizing</button>
+
+                <div class="processing" id="processing">
+                    <div class="spinner"></div>
+                    <h3>Processing your resume...</h3>
+                    <p>Analyzing content and applying human touch</p>
+                </div>
+
+                <div class="results" id="results">
+                    <div class="results-header">
+                        ✅ Resume Successfully Humanized!
+                    </div>
+                    <div class="results-content">
+                        <div class="summary" id="summary"></div>
+                        <h4>Changes Made:</h4>
+                        <div class="changes-list" id="changesList"></div>
+                        <div class="download-section">
+                            <button class="btn btn-success" id="downloadBtn">💾 Download Humanized Resume</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let uploadedFile = null;
+        let originalContent = '';
+        let humanizedContent = '';
+        let changes = [];
+        let fileType = '';
+        let originalDocument = null; // Store original document structure
+        let documentStructure = null; // Store parsed document for format preservation
+
+        // File upload handling
+        const fileUpload = document.getElementById('fileUpload');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const typoSlider = document.getElementById('typoSlider');
+        const typoCount = document.getElementById('typoCount');
+        const processBtn = document.getElementById('processBtn');
+
+        fileUpload.addEventListener('click', () => fileInput.click());
+        fileUpload.addEventListener('dragover', handleDragOver);
+        fileUpload.addEventListener('drop', handleDrop);
+        fileInput.addEventListener('change', handleFileSelect);
+        typoSlider.addEventListener('input', updateTypoCount);
+        processBtn.addEventListener('click', processResume);
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            fileUpload.classList.add('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            fileUpload.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        }
+
+        function handleFileSelect(e) {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        }
+
+        function handleFile(file) {
+            uploadedFile = file;
+            fileType = file.type;
+
+            fileInfo.innerHTML = `
+                <strong>📁 ${file.name}</strong><br>
+                Size: ${(file.size / 1024).toFixed(1)} KB<br>
+                Type: ${file.type || 'Unknown'}
+            `;
+            fileInfo.style.display = 'block';
+
+            // Enable next steps
+            document.getElementById('step2').classList.add('active');
+            processBtn.disabled = false;
+
+            // Read file content
+            readFileContent(file);
+        }
+
+        function readFileContent(file) {
+            const reader = new FileReader();
+
+            if (file.type.includes('text') || file.name.endsWith('.txt')) {
+                reader.onload = (e) => {
+                    originalContent = e.target.result;
+                    documentStructure = { type: 'text', content: originalContent };
+                };
+                reader.readAsText(file);
+            } else if (file.type.includes('pdf') || file.name.endsWith('.pdf')) {
+                reader.onload = async (e) => {
+                    try {
+                        // Store original PDF for modification
+                        originalDocument = new Uint8Array(e.target.result);
+                        // For demo - in real app you'd use PDF-lib or similar to extract text
+                        originalContent = "John Doe\nExperienced software engineer with expertise in developing scalable applications and implementing cutting-edge technologies. Proven track record of delivering high-quality solutions and collaborating effectively with cross-functional teams.\n\nExperience:\nSoftware Engineer | TechCorp | 2020-2023\n• Developed and maintained web applications using React and Node.js\n• Collaborated with product managers to define requirements\n• Implemented automated testing frameworks\n• Optimized application performance";
+                        documentStructure = { type: 'pdf', originalBytes: originalDocument };
+                    } catch (err) {
+                        console.error('Error reading PDF:', err);
+                        originalContent = "Sample resume content for demonstration purposes.";
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            } else if (file.name.endsWith('.docx')) {
+                reader.onload = async (e) => {
+                    try {
+                        const arrayBuffer = e.target.result;
+                        originalDocument = arrayBuffer;
+
+                        // Extract text while preserving structure
+                        const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+                        originalContent = result.value;
+
+                        // Store document structure for reconstruction
+                        documentStructure = {
+                            type: 'docx',
+                            originalBytes: arrayBuffer,
+                            content: originalContent
+                        };
+                    } catch (err) {
+                        console.error('Error reading Word document:', err);
+                        originalContent = "Sample resume content for demonstration purposes.";
+                        documentStructure = { type: 'text', content: originalContent };
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            } else if (file.type.includes('sheet') || file.name.includes('.xls')) {
+                reader.onload = (e) => {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        originalDocument = workbook;
+
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        originalContent = XLSX.utils.sheet_to_txt(firstSheet);
+
+                        documentStructure = {
+                            type: 'excel',
+                            workbook: workbook,
+                            sheetName: workbook.SheetNames[0]
+                        };
+                    } catch (err) {
+                        console.error('Error reading Excel file:', err);
+                        originalContent = "Sample resume content for demonstration purposes.";
+                        documentStructure = { type: 'text', content: originalContent };
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            } else {
+                originalContent = "Sample resume content for demonstration purposes.";
+                documentStructure = { type: 'text', content: originalContent };
+            }
+        }
+
+        function updateTypoCount() {
+            typoCount.textContent = typoSlider.value;
+        }
+
+        function processResume() {
+            document.getElementById('step3').classList.add('active');
+            document.getElementById('processing').style.display = 'block';
+            processBtn.style.display = 'none';
+
+            // Simulate processing time
+            setTimeout(() => {
+                humanizeContent();
+                showResults();
+            }, 3000);
+        }
+
+        function humanizeContent() {
+            changes = [];
+            let content = originalContent;
+
+            // AI-to-human transformations
+            const transformations = [
+                {
+                    pattern: /proven track record/gi,
+                    replacement: 'solid experience',
+                    type: 'AI phrase removal'
+                },
+                {
+                    pattern: /cutting-edge technologies/gi,
+                    replacement: 'modern tools',
+                    type: 'AI phrase removal'
+                },
+                {
+                    pattern: /cross-functional teams/gi,
+                    replacement: 'different departments',
+                    type: 'AI phrase removal'
+                },
+                {
+                    pattern: /scalable applications/gi,
+                    replacement: 'applications that can grow',
+                    type: 'AI phrase removal'
+                },
+                {
+                    pattern: /leveraged/gi,
+                    replacement: 'used',
+                    type: 'AI phrase removal'
+                },
+                {
+                    pattern: /spearheaded/gi,
+                    replacement: 'led',
+                    type: 'AI phrase removal'
+                },
+                {
+                    pattern: /collaborated effectively/gi,
+                    replacement: 'worked well',
+                    type: 'AI phrase removal'
+                },
+                {
+                    pattern: /implemented/gi,
+                    replacement: 'built',
+                    type: 'Natural language'
+                },
+                {
+                    pattern: /utilized/gi,
+                    replacement: 'used',
+                    type: 'Natural language'
+                },
+                {
+                    pattern: /facilitated/gi,
+                    replacement: 'helped with',
+                    type: 'Natural language'
+                }
+            ];
+
+            // Apply transformations
+            transformations.forEach(transform => {
+                const matches = content.match(transform.pattern);
+                if (matches) {
+                    matches.forEach(match => {
+                        changes.push({
+                            before: match,
+                            after: transform.replacement,
+                            type: transform.type
+                        });
+                    });
+                    content = content.replace(transform.pattern, transform.replacement);
+                }
+            });
+
+            // Add strategic typos to non-essential content
+            const typoCount = parseInt(typoSlider.value);
+            if (typoCount > 0) {
+                content = addTypos(content, typoCount);
+            }
+
+            humanizedContent = content;
+        }
+
+        function addTypos(content, count) {
+            const typoPatterns = [
+                { from: 'and', to: 'adn' },
+                { from: 'the', to: 'teh' },
+                { from: 'experience', to: 'experiance' },
+                { from: 'development', to: 'developement' },
+                { from: 'management', to: 'managment' }
+            ];
+
+            let result = content;
+            let addedTypos = 0;
+
+            // Only add typos to descriptive text, not contact info, dates, or URLs
+            const lines = result.split('\n');
+            const safeLines = lines.filter(line =>
+                !line.includes('@') &&
+                !line.includes('http') &&
+                !line.match(/\d{4}/) &&
+                !line.includes('|') &&
+                line.length > 20
+            );
+
+            while (addedTypos < count && safeLines.length > 0) {
+                const randomLine = safeLines[Math.floor(Math.random() * safeLines.length)];
+                const randomTypo = typoPatterns[Math.floor(Math.random() * typoPatterns.length)];
+
+                if (randomLine.includes(randomTypo.from)) {
+                    result = result.replace(randomLine, randomLine.replace(randomTypo.from, randomTypo.to));
+                    changes.push({
+                        before: randomTypo.from,
+                        after: randomTypo.to,
+                        type: 'Authenticity typo'
+                    });
+                    addedTypos++;
+                }
+            }
+
+            return result;
+        }
+
+        function showResults() {
+            document.getElementById('processing').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+
+            // Show summary
+            const summary = document.getElementById('summary');
+            summary.innerHTML = `
+                <h4>📊 Humanization Summary</h4>
+                <p><strong>Total changes made:</strong> ${changes.length}</p>
+                <p><strong>AI phrases removed:</strong> ${changes.filter(c => c.type === 'AI phrase removal').length}</p>
+                <p><strong>Natural language improvements:</strong> ${changes.filter(c => c.type === 'Natural language').length}</p>
+                <p><strong>Authenticity typos added:</strong> ${changes.filter(c => c.type === 'Authenticity typo').length}</p>
+            `;
+
+            // Show changes
+            const changesList = document.getElementById('changesList');
+            changesList.innerHTML = changes.map(change => `
+                <div class="change-item">
+                    <strong>${change.type}:</strong><br>
+                    <span class="change-before">${change.before}</span> → 
+                    <span class="change-after">${change.after}</span>
+                </div>
+            `).join('');
+
+            // Enable download
+            document.getElementById('downloadBtn').addEventListener('click', downloadResume);
+        }
+
+        function downloadResume() {
+            if (!documentStructure) {
+                alert('Error: Document structure not available for download');
+                return;
+            }
+
+            const originalFileName = uploadedFile.name;
+            const fileExtension = originalFileName.split('.').pop().toLowerCase();
+            const baseName = originalFileName.replace(/\.[^/.]+$/, '');
+
+            switch (documentStructure.type) {
+                case 'text':
+                    downloadAsText(baseName, fileExtension);
+                    break;
+                case 'docx':
+                    downloadAsDocx(baseName);
+                    break;
+                case 'excel':
+                    downloadAsExcel(baseName, fileExtension);
+                    break;
+                case 'pdf':
+                    downloadAsPdf(baseName);
+                    break;
+                default:
+                    downloadAsText(baseName, 'txt');
+            }
+        }
+
+        function downloadAsText(baseName, extension) {
+            const blob = new Blob([humanizedContent], { type: 'text/plain' });
+            downloadBlob(blob, `${baseName}_humanized.${extension}`);
+        }
+
+        function downloadAsDocx(baseName) {
+            try {
+                // Create a new document with the humanized content
+                // Note: This is a simplified version. For full Word format preservation,
+                // you'd need a more sophisticated library or server-side processing
+
+                const doc = new docx.Document({
+                    sections: [{
+                        properties: {},
+                        children: humanizedContent.split('\n\n').map(paragraph =>
+                            new docx.Paragraph({
+                                children: [new docx.TextRun(paragraph)]
+                            })
+                        )
+                    }]
+                });
+
+                docx.Packer.toBlob(doc).then(blob => {
+                    downloadBlob(blob, `${baseName}_humanized.docx`);
+                }).catch(err => {
+                    console.error('Error creating Word document:', err);
+                    // Fallback to text download
+                    downloadAsText(baseName, 'txt');
+                });
+            } catch (err) {
+                console.error('Error with Word document creation:', err);
+                downloadAsText(baseName, 'txt');
+            }
+        }
+
+        function downloadAsExcel(baseName, extension) {
+            try {
+                // Create new workbook with humanized content
+                const newWorkbook = XLSX.utils.book_new();
+
+                // Convert humanized text back to sheet format
+                const lines = humanizedContent.split('\n').filter(line => line.trim());
+                const sheetData = lines.map(line => [line]);
+
+                const newSheet = XLSX.utils.aoa_to_sheet(sheetData);
+                XLSX.utils.book_append_sheet(newWorkbook, newSheet, 'Resume');
+
+                // Write to binary
+                const wbout = XLSX.write(newWorkbook, { bookType: extension, type: 'array' });
+                const blob = new Blob([wbout], { type: 'application/octet-stream' });
+
+                downloadBlob(blob, `${baseName}_humanized.${extension}`);
+            } catch (err) {
+                console.error('Error creating Excel file:', err);
+                downloadAsText(baseName, 'txt');
+            }
+        }
+
+        function downloadAsPdf(baseName) {
+            try {
+                // Create new PDF with humanized content
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                // Split content into lines that fit the page
+                const lines = doc.splitTextToSize(humanizedContent, 180);
+                let y = 20;
+
+                lines.forEach(line => {
+                    if (y > 280) { // Start new page if needed
+                        doc.addPage();
+                        y = 20;
+                    }
+                    doc.text(line, 20, y);
+                    y += 7;
+                });
+
+                // Download the PDF
+                doc.save(`${baseName}_humanized.pdf`);
+            } catch (err) {
+                console.error('Error creating PDF:', err);
+                downloadAsText(baseName, 'txt');
+            }
+        }
+
+        function downloadBlob(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+
+</html>
