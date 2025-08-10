@@ -4,11 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resume Humanizer</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.7.0/docx.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -27,7 +22,6 @@
             max-width: 1200px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             overflow: hidden;
@@ -66,8 +60,6 @@
         .step.active {
             border-color: #3498db;
             background: rgba(52, 152, 219, 0.05);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.1);
         }
 
         .step-header {
@@ -108,11 +100,6 @@
         .file-upload:hover {
             border-color: #3498db;
             background: rgba(52, 152, 219, 0.05);
-        }
-
-        .file-upload.dragover {
-            border-color: #2ecc71;
-            background: rgba(46, 204, 113, 0.1);
         }
 
         .file-upload input {
@@ -182,10 +169,6 @@
             transform: none;
         }
 
-        .btn-success {
-            background: linear-gradient(135deg, #2ecc71, #27ae60);
-        }
-
         .processing {
             text-align: center;
             padding: 40px;
@@ -227,59 +210,6 @@
             padding: 20px;
         }
 
-        .preview-section {
-            margin: 20px 0;
-        }
-
-        .preview-container {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 20px;
-            max-height: 500px;
-            overflow-y: auto;
-            font-family: 'Times New Roman', serif;
-            line-height: 1.6;
-            white-space: pre-wrap;
-        }
-
-        .preview-header {
-            background: #495057;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 8px 8px 0 0;
-            font-weight: 600;
-            margin: 0;
-        }
-
-        .preview-tabs {
-            display: flex;
-            margin-bottom: 0;
-        }
-
-        .preview-tab {
-            background: #6c757d;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 8px 8px 0 0;
-            margin-right: 2px;
-            font-weight: 500;
-        }
-
-        .preview-tab.active {
-            background: #495057;
-        }
-
-        .preview-content {
-            display: none;
-        }
-
-        .preview-content.active {
-            display: block;
-        }
-
         .summary {
             background: #f8f9fa;
             padding: 20px;
@@ -287,55 +217,83 @@
             margin-bottom: 20px;
         }
 
-        .changes-list {
-            max-height: 300px;
-            overflow-y: auto;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 15px;
+        .changes-section {
+            margin: 20px 0;
         }
 
         .change-item {
-            margin-bottom: 15px;
-            padding: 10px;
+            padding: 15px;
             background: rgba(52, 152, 219, 0.1);
-            border-radius: 5px;
+            border-radius: 8px;
             border-left: 4px solid #3498db;
+            margin-bottom: 10px;
+        }
+
+        .change-type {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #3498db;
+            margin-bottom: 5px;
+            text-transform: uppercase;
         }
 
         .change-before {
             color: #e74c3c;
             text-decoration: line-through;
             font-style: italic;
+            background: rgba(231, 76, 60, 0.1);
+            padding: 2px 4px;
+            border-radius: 3px;
         }
 
         .change-after {
             color: #27ae60;
             font-weight: 500;
+            background: rgba(39, 174, 96, 0.1);
+            padding: 2px 4px;
+            border-radius: 3px;
         }
 
-        .download-section {
-            margin-top: 20px;
+        .copy-section {
+            margin-top: 30px;
             text-align: center;
         }
 
-        @media (max-width: 768px) {
-            .main-content {
-                padding: 20px;
-            }
-            
-            .header {
-                padding: 30px 20px;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .step {
-                padding: 20px;
-            }
+        .copy-button {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            margin: 10px;
+        }
+
+        .preview-container {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Times New Roman', serif;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        .instructions {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .instructions h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .instructions p {
+            color: #856404;
+            margin-bottom: 5px;
         }
     </style>
 </head>
@@ -347,30 +305,25 @@
         </div>
 
         <div class="main-content">
-            <!-- Step 1: File Upload -->
             <div class="step active" id="step1">
                 <div class="step-header">
                     <div class="step-number">1</div>
                     <div class="step-title">Upload Your Resume</div>
                 </div>
                 <div class="file-upload" id="fileUpload">
-                    <input type="file" id="fileInput" accept=".doc,.docx,.txt">
+                    <input type="file" id="fileInput" accept=".txt,.rtf,.pdf,.docx">
                     <div>
                         <h3>📄 Drop your resume here or click to browse</h3>
-                        <p>Supports Word (.docx) and text files</p>
-                        <p style="font-size: 0.9rem; color: #7f8c8d; margin-top: 10px;">
-                            <strong>Note:</strong> For PDF files, please save/export as Word (.docx) or text (.txt) first
-                        </p>
+                        <p>Supports PDF, DOCX, Text, and RTF files</p>
                     </div>
                 </div>
                 <div class="file-info" id="fileInfo"></div>
             </div>
 
-            <!-- Step 2: Typo Configuration -->
             <div class="step" id="step2">
                 <div class="step-header">
                     <div class="step-number">2</div>
-                    <div class="step-title">Configure Authenticity Settings</div>
+                    <div class="step-title">Configure Settings</div>
                 </div>
                 <div class="typo-config">
                     <label for="typoSlider">Number of minor typos to add:</label>
@@ -379,49 +332,59 @@
                     </div>
                     <span id="typoCount">2</span>
                 </div>
-                <p style="margin-top: 10px; color: #7f8c8d; font-size: 0.9rem;">
-                    Typos will only be added to non-essential content (not contact info, dates, or URLs)
-                </p>
+                
+                <div style="margin-top: 30px;">
+                    <label for="personaSelect" style="display: block; margin-bottom: 10px; font-weight: 600;">Select Your Persona:</label>
+                    <select id="personaSelect" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; background: white;">
+                        <option value="seasoned">Seasoned Professional</option>
+                        <option value="finance">Finance Bro</option>
+                        <option value="data">Data Nerd</option>
+                        <option value="associate">Associate Level</option>
+                        <option value="junior">Junior/Entry Level</option>
+                    </select>
+                </div>
             </div>
 
-            <!-- Step 3: Process -->
             <div class="step" id="step3">
                 <div class="step-header">
                     <div class="step-number">3</div>
-                    <div class="step-title">Humanize Your Resume</div>
+                    <div class="step-title">Analyze & Humanize</div>
                 </div>
-                <button class="btn" id="processBtn" disabled>🚀 Start Humanizing</button>
+                <button class="btn" id="processBtn" disabled>🚀 Start Analysis</button>
                 
                 <div class="processing" id="processing">
                     <div class="spinner"></div>
-                    <h3>Processing your resume...</h3>
-                    <p>Analyzing content and applying human touch</p>
+                    <h3>Analyzing your resume...</h3>
+                    <p>Finding AI patterns and suggesting improvements</p>
                 </div>
 
                 <div class="results" id="results">
                     <div class="results-header">
-                        ✅ Resume Successfully Humanized!
+                        ✅ Analysis Complete!
                     </div>
                     <div class="results-content">
                         <div class="summary" id="summary"></div>
                         
-                        <div class="preview-section">
-                            <div class="preview-tabs">
-                                <button class="preview-tab active" onclick="showPreview('original')">Original Resume</button>
-                                <button class="preview-tab" onclick="showPreview('humanized')">Humanized Resume</button>
-                            </div>
-                            <div class="preview-content active" id="originalPreview">
-                                <div class="preview-container" id="originalText"></div>
-                            </div>
-                            <div class="preview-content" id="humanizedPreview">
-                                <div class="preview-container" id="humanizedText"></div>
-                            </div>
+                        <div style="text-align: center; margin: 20px 0;">
+                            <button class="btn" id="retryBtn" style="background: linear-gradient(135deg, #9b59b6, #8e44ad); margin-right: 10px;">🔄 Try Again</button>
                         </div>
                         
-                        <h4>Changes Made:</h4>
-                        <div class="changes-list" id="changesList"></div>
-                        <div class="download-section">
-                            <button class="btn btn-success" id="downloadBtn">💾 Download Humanized Resume</button>
+                        <div class="instructions">
+                            <h4>📝 How to Apply These Changes:</h4>
+                            <p>1. Review each suggested change below</p>
+                            <p>2. Copy the improved text using the button</p>
+                            <p>3. Replace your original resume content with the improved version</p>
+                        </div>
+                        
+                        <div class="changes-section">
+                            <h4>🔍 Suggested Changes:</h4>
+                            <div id="changesList"></div>
+                        </div>
+
+                        <div class="copy-section">
+                            <h4>📋 Your Improved Resume:</h4>
+                            <button class="btn copy-button" id="copyBtn">📄 Copy Improved Text</button>
+                            <div class="preview-container" id="humanizedText"></div>
                         </div>
                     </div>
                 </div>
@@ -429,596 +392,683 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
     <script>
         let uploadedFile = null;
         let originalContent = '';
         let humanizedContent = '';
         let changes = [];
-        let fileType = '';
-        let originalDocument = null; // Store original document structure
-        let documentStructure = null; // Store parsed document for format preservation
-        let fileReadComplete = false; // Track if file reading is complete
+        let fileReadComplete = false;
 
-        // File upload handling
+        // Set PDF.js worker path
+        if (typeof pdfjsLib !== 'undefined') {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+
+        function convertRTFToPlainText(rtfText) {
+            let plainText = rtfText;
+            
+            // Remove RTF control codes
+            plainText = plainText
+                .replace(/\\rtf\d+/g, '')
+                .replace(/\\ansi/g, '')
+                .replace(/\\deff\d+/g, '')
+                .replace(/\{\\fonttbl[^}]*\}/g, '')
+                .replace(/\{\\colortbl[^}]*\}/g, '')
+                .replace(/\\[a-z]+\d*/gi, ' ')
+                .replace(/\\[^a-z\s]/gi, '')
+                .replace(/[{}]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+                
+            // Convert RTF line breaks
+            plainText = plainText
+                .replace(/\\par\b/g, '\n')
+                .replace(/\\line\b/g, '\n');
+                
+            return plainText;
+        }
+
+        async function extractTextFromPDF(file) {
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                let fullText = '';
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(' ');
+                    fullText += pageText + '\n';
+                }
+
+                return fullText.trim();
+            } catch (error) {
+                throw new Error('Failed to extract text from PDF: ' + error.message);
+            }
+        }
+
+        async function extractTextFromDOCX(file) {
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const result = await mammoth.extractRawText({arrayBuffer: arrayBuffer});
+                return result.value;
+            } catch (error) {
+                throw new Error('Failed to extract text from DOCX: ' + error.message);
+            }
+        }
+
         const fileUpload = document.getElementById('fileUpload');
         const fileInput = document.getElementById('fileInput');
         const fileInfo = document.getElementById('fileInfo');
         const typoSlider = document.getElementById('typoSlider');
         const typoCount = document.getElementById('typoCount');
+        const personaSelect = document.getElementById('personaSelect');
         const processBtn = document.getElementById('processBtn');
 
-        fileUpload.addEventListener('click', () => fileInput.click());
-        fileUpload.addEventListener('dragover', handleDragOver);
-        fileUpload.addEventListener('drop', handleDrop);
-        fileInput.addEventListener('change', handleFileSelect);
-        typoSlider.addEventListener('input', updateTypoCount);
-        processBtn.addEventListener('click', processResume);
+        fileUpload.addEventListener('click', function() {
+            fileInput.click();
+        });
 
-        function handleDragOver(e) {
+        fileUpload.addEventListener('dragover', function(e) {
             e.preventDefault();
-            fileUpload.classList.add('dragover');
-        }
+            fileUpload.style.borderColor = '#3498db';
+        });
 
-        function handleDrop(e) {
+        fileUpload.addEventListener('dragleave', function(e) {
             e.preventDefault();
-            fileUpload.classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                handleFile(files[0]);
+            fileUpload.style.borderColor = '#bdc3c7';
+        });
+
+        fileUpload.addEventListener('drop', function(e) {
+            e.preventDefault();
+            fileUpload.style.borderColor = '#bdc3c7';
+            if (e.dataTransfer.files.length > 0) {
+                handleFile(e.dataTransfer.files[0]);
             }
-        }
+        });
 
-        function handleFileSelect(e) {
+        fileInput.addEventListener('change', function(e) {
             if (e.target.files.length > 0) {
                 handleFile(e.target.files[0]);
             }
-        }
+        });
+
+        typoSlider.addEventListener('input', function() {
+            typoCount.textContent = typoSlider.value;
+        });
+
+        processBtn.addEventListener('click', function() {
+            processResume();
+        });
 
         function handleFile(file) {
             uploadedFile = file;
-            fileType = file.type;
             fileReadComplete = false;
             
-            fileInfo.innerHTML = `
-                <strong>📁 ${file.name}</strong><br>
-                Size: ${(file.size / 1024).toFixed(1)} KB<br>
-                Type: ${file.type || 'Unknown'}<br>
-                <em>Reading file content...</em>
-            `;
+            fileInfo.innerHTML = '<strong>📁 ' + file.name + '</strong><br>Size: ' + (file.size / 1024).toFixed(1) + ' KB<br><em>Reading content...</em>';
             fileInfo.style.display = 'block';
             
-            // Enable next steps
             document.getElementById('step2').classList.add('active');
-            processBtn.disabled = true; // Keep disabled until file is read
+            processBtn.disabled = true;
             
-            // Read file content
             readFileContent(file);
         }
 
-        async function readFileContent(file) {
-            function onFileReadComplete() {
-                fileReadComplete = true;
-                processBtn.disabled = false;
-                
-                // Update file info to show content is ready
-                fileInfo.innerHTML = `
-                    <strong>📁 ${file.name}</strong><br>
-                    Size: ${(file.size / 1024).toFixed(1)} KB<br>
-                    Type: ${file.type || 'Unknown'}<br>
-                    <span style="color: green;">✅ Content loaded successfully</span>
-                `;
-                
-                console.log('File reading complete. Content preview:', originalContent.substring(0, 150) + '...');
-            }
+        function readFileContent(file) {
+            const fileName = file.name.toLowerCase();
             
-            if (file.type.includes('text') || file.name.endsWith('.txt')) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    originalContent = e.target.result;
-                    documentStructure = { type: 'text', content: originalContent };
-                    onFileReadComplete();
-                };
-                reader.readAsText(file);
-            } else if (file.name.endsWith('.docx')) {
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    try {
-                        const arrayBuffer = e.target.result;
-                        originalDocument = arrayBuffer;
-                        
-                        // Extract text while preserving structure
-                        const result = await mammoth.extractRawText({arrayBuffer: arrayBuffer});
-                        originalContent = result.value;
-                        
-                        // Store document structure for reconstruction
-                        documentStructure = {
-                            type: 'docx',
-                            originalBytes: arrayBuffer,
-                            content: originalContent
-                        };
-                        onFileReadComplete();
-                    } catch (err) {
-                        console.error('Error reading Word document:', err);
-                        originalContent = "Error reading Word document. Please try uploading as text file.";
-                        documentStructure = { type: 'text', content: originalContent };
-                        onFileReadComplete();
-                    }
-                };
-                reader.readAsArrayBuffer(file);
-            } else if (file.type.includes('sheet') || file.name.includes('.xls') || file.name.endsWith('.xlsx')) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    try {
-                        const data = new Uint8Array(e.target.result);
-                        const workbook = XLSX.read(data, {type: 'array'});
-                        originalDocument = workbook;
-                        
-                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                        originalContent = XLSX.utils.sheet_to_txt(firstSheet);
-                        
-                        documentStructure = {
-                            type: 'excel',
-                            workbook: workbook,
-                            sheetName: workbook.SheetNames[0]
-                        };
-                        onFileReadComplete();
-                    } catch (err) {
-                        console.error('Error reading Excel file:', err);
-                        originalContent = "Error reading Excel file. Please try uploading as text file.";
-                        documentStructure = { type: 'text', content: originalContent };
-                        onFileReadComplete();
-                    }
-                };
-                reader.readAsArrayBuffer(file);
-            } else if (file.type.includes('pdf') || file.name.endsWith('.pdf')) {
-                // Handle PDF files by asking user to convert
-                originalContent = `PDF files are not directly supported for text extraction.
-
-Please convert your PDF resume to one of these formats for processing:
-
-1. Save as Word document (.docx) - Recommended
-2. Save as plain text (.txt) 
-3. Copy and paste content into a text file
-
-This ensures your resume content is properly read and humanized.`;
-
-                documentStructure = { type: 'text', content: originalContent };
-                
-                // Update file info to show PDF limitation
-                fileInfo.innerHTML = `
-                    <strong>📁 ${file.name}</strong><br>
-                    Size: ${(file.size / 1024).toFixed(1)} KB<br>
-                    Type: PDF<br>
-                    <span style="color: #e74c3c;">❌ PDF not supported - please convert to .docx or .txt</span>
-                `;
-                
-                onFileReadComplete();
+            // Show processing message
+            fileInfo.innerHTML = '<strong>📁 ' + file.name + '</strong><br>Size: ' + (file.size / 1024).toFixed(1) + ' KB<br><em>Processing ' + getFileTypeDescription(fileName) + '...</em>';
+            
+            if (fileName.endsWith('.pdf')) {
+                extractTextFromPDF(file)
+                    .then(text => {
+                        originalContent = text;
+                        fileReadComplete = true;
+                        processBtn.disabled = false;
+                        updateFileInfoSuccess(file);
+                    })
+                    .catch(error => {
+                        handleFileError(file, error);
+                    });
+            } else if (fileName.endsWith('.docx')) {
+                extractTextFromDOCX(file)
+                    .then(text => {
+                        originalContent = text;
+                        fileReadComplete = true;
+                        processBtn.disabled = false;
+                        updateFileInfoSuccess(file);
+                    })
+                    .catch(error => {
+                        handleFileError(file, error);
+                    });
             } else {
-                // Try to read as text anyway
+                // Handle RTF and TXT files
                 const reader = new FileReader();
-                reader.onload = (e) => {
-                    originalContent = e.target.result || "Unsupported file format. Please upload PDF, Word, Excel, or text files.";
-                    documentStructure = { type: 'text', content: originalContent };
-                    onFileReadComplete();
+                
+                reader.onload = function(e) {
+                    try {
+                        if (fileName.endsWith('.rtf')) {
+                            originalContent = convertRTFToPlainText(e.target.result);
+                        } else {
+                            originalContent = e.target.result;
+                        }
+                        
+                        fileReadComplete = true;
+                        processBtn.disabled = false;
+                        updateFileInfoSuccess(file);
+                    } catch (error) {
+                        handleFileError(file, error);
+                    }
                 };
+                
+                reader.onerror = function() {
+                    handleFileError(file, new Error('Failed to read file'));
+                };
+                
                 reader.readAsText(file);
             }
         }
 
-        // Simple PDF text extraction function
-        async function extractTextFromPDF(arrayBuffer) {
-            // This is a very basic PDF text extraction
-            // For production use, implement proper PDF.js integration
+        function getFileTypeDescription(fileName) {
+            if (fileName.endsWith('.pdf')) return 'PDF document';
+            if (fileName.endsWith('.docx')) return 'Word document';
+            if (fileName.endsWith('.rtf')) return 'RTF document';
+            return 'text file';
+        }
+
+        function updateFileInfoSuccess(file) {
             try {
-                const uint8Array = new Uint8Array(arrayBuffer);
-                const text = String.fromCharCode.apply(null, uint8Array);
-                
-                // Very basic text extraction - look for readable text patterns
-                const textMatches = text.match(/\(([^)]+)\)/g);
-                if (textMatches) {
-                    return textMatches.map(match => match.slice(1, -1)).join(' ').replace(/\s+/g, ' ');
-                }
-                
-                // Fallback: Return a message asking for different format
-                return "PDF text extraction is limited. For best results, please upload your resume as a Word document (.docx) or text file.";
-            } catch (err) {
-                console.error('PDF extraction error:', err);
-                return "Unable to extract text from PDF. Please try uploading as Word or text file.";
+                const wordCount = originalContent ? originalContent.split(/\s+/).filter(word => word.length > 0).length : 0;
+                fileInfo.innerHTML = '<strong>📁 ' + file.name + '</strong><br>' +
+                    'Size: ' + (file.size / 1024).toFixed(1) + ' KB<br>' +
+                    'Words extracted: ' + wordCount + '<br>' +
+                    '<span style="color: green;">✅ Content loaded successfully</span>';
+            } catch (error) {
+                fileInfo.innerHTML = '<strong>📁 ' + file.name + '</strong><br>' +
+                    'Size: ' + (file.size / 1024).toFixed(1) + ' KB<br>' +
+                    '<span style="color: green;">✅ Content loaded successfully</span>';
             }
         }
 
-        function updateTypoCount() {
-            typoCount.textContent = typoSlider.value;
+        function handleFileError(file, error) {
+            fileReadComplete = false;
+            processBtn.disabled = true;
+            fileInfo.innerHTML = '<strong>📁 ' + file.name + '</strong><br>' +
+                'Size: ' + (file.size / 1024).toFixed(1) + ' KB<br>' +
+                '<span style="color: red;">❌ Error: ' + error.message + '</span><br>' +
+                '<small>Please try a different file or format.</small>';
         }
 
         function processResume() {
-            if (!fileReadComplete) {
-                alert('Please wait for the file to finish loading');
-                return;
-            }
-            
-            if (!originalContent || originalContent.trim() === '') {
-                alert('No content found in the uploaded file. Please try a different file.');
+            if (!fileReadComplete || !originalContent || originalContent.trim().length === 0) {
+                alert('Please upload a valid file with content first');
                 return;
             }
 
-            console.log('Starting processing with content length:', originalContent.length);
-            console.log('Content preview:', originalContent.substring(0, 200));
+            try {
+                document.getElementById('step3').classList.add('active');
+                document.getElementById('processing').style.display = 'block';
+                processBtn.style.display = 'none';
 
-            document.getElementById('step3').classList.add('active');
-            document.getElementById('processing').style.display = 'block';
-            processBtn.style.display = 'none';
-
-            // Process immediately since file is already loaded
-            setTimeout(() => {
-                humanizeContent();
-                showResults();
-            }, 1000);
+                setTimeout(function() {
+                    try {
+                        humanizeContent();
+                        showResults();
+                    } catch (error) {
+                        console.error('Error during humanization:', error);
+                        alert('There was an error processing your resume. Please try again.');
+                        document.getElementById('processing').style.display = 'none';
+                        processBtn.style.display = 'block';
+                    }
+                }, 1500);
+            } catch (error) {
+                console.error('Error starting process:', error);
+                alert('There was an error starting the process. Please try again.');
+            }
         }
 
         function humanizeContent() {
             changes = [];
             let content = originalContent;
+            const selectedPersona = personaSelect.value;
             
-            console.log('=== STARTING HUMANIZATION ===');
-            console.log('Original content length:', content.length);
-            console.log('Original content preview:', content.substring(0, 200));
-            
-            // AI-to-human transformations with case-insensitive matching
-            const transformations = [
-                {
-                    pattern: /proven track record/gi,
-                    replacement: 'solid experience',
-                    type: 'AI phrase removal'
-                },
-                {
-                    pattern: /cutting-edge technologies/gi,
-                    replacement: 'modern tools',
-                    type: 'AI phrase removal'
-                },
-                {
-                    pattern: /cross-functional teams/gi,
-                    replacement: 'different departments',
-                    type: 'AI phrase removal'
-                },
-                {
-                    pattern: /scalable applications/gi,
-                    replacement: 'applications that can grow',
-                    type: 'AI phrase removal'
-                },
-                {
-                    pattern: /\bleveraged\b/gi,
-                    replacement: 'used',
-                    type: 'AI phrase removal'
-                },
-                {
-                    pattern: /\bspearheaded\b/gi,
-                    replacement: 'led',
-                    type: 'AI phrase removal'
-                },
-                {
-                    pattern: /collaborated effectively/gi,
-                    replacement: 'worked well',
-                    type: 'AI phrase removal'
-                },
-                {
-                    pattern: /\bimplemented\b/gi,
-                    replacement: 'built',
-                    type: 'Natural language'
-                },
-                {
-                    pattern: /\butilized\b/gi,
-                    replacement: 'used',
-                    type: 'Natural language'
-                },
-                {
-                    pattern: /\bfacilitated\b/gi,
-                    replacement: 'helped with',
-                    type: 'Natural language'
-                },
-                {
-                    pattern: /\bstakeholders\b/gi,
-                    replacement: 'team members',
-                    type: 'AI phrase removal'
-                },
-                {
-                    pattern: /\bsynergies\b/gi,
-                    replacement: 'teamwork',
-                    type: 'AI phrase removal'
-                },
-                {
-                    pattern: /\boptimized\b/gi,
-                    replacement: 'improved',
-                    type: 'Natural language'
-                },
-                {
-                    pattern: /\bstreamlined\b/gi,
-                    replacement: 'simplified',
-                    type: 'Natural language'
-                },
-                {
-                    pattern: /\benhanced\b/gi,
-                    replacement: 'made better',
-                    type: 'Natural language'
-                }
-            ];
+            // Get persona-specific patterns
+            const aiPatterns = getPersonaPatterns(selectedPersona);
 
-            // Apply transformations and track changes
-            transformations.forEach((transform, index) => {
-                const beforeReplace = content;
-                const matches = content.match(transform.pattern);
+            // Process each pattern individually to get better tracking
+            aiPatterns.forEach(function(pattern) {
+                const regex = pattern.pattern;
+                let match;
+                const matches = [];
                 
-                if (matches) {
-                    console.log(`Found matches for pattern ${index}:`, matches);
-                    content = content.replace(transform.pattern, transform.replacement);
+                // Find all matches first
+                while ((match = regex.exec(content)) !== null) {
+                    matches.push({
+                        text: match[0],
+                        index: match.index
+                    });
+                    // Reset regex lastIndex to avoid infinite loop with global flag
+                    if (!regex.global) break;
+                }
+                
+                // Reset the regex for actual replacement
+                regex.lastIndex = 0;
+                
+                // If we found matches, do the replacement and track changes
+                if (matches.length > 0) {
+                    content = content.replace(pattern.pattern, pattern.replacement);
                     
-                    // Add change for each match
-                    matches.forEach(match => {
+                    // Add change tracking for each unique match
+                    const uniqueMatches = [...new Set(matches.map(m => m.text.toLowerCase()))];
+                    uniqueMatches.forEach(function(uniqueMatch) {
                         changes.push({
-                            before: match,
-                            after: transform.replacement,
-                            type: transform.type
+                            before: uniqueMatch,
+                            after: pattern.replacement,
+                            type: pattern.type
                         });
                     });
                 }
             });
 
-            console.log('After text transformations, changes so far:', changes.length);
-
-            // Add strategic typos to non-essential content
-            const typoCount = parseInt(typoSlider.value);
-            console.log('Adding', typoCount, 'typos');
-            
-            if (typoCount > 0) {
-                content = addTypos(content, typoCount);
+            const typoCountValue = parseInt(typoSlider.value);
+            if (typoCountValue > 0) {
+                content = addTypos(content, typoCountValue);
             }
 
             humanizedContent = content;
-            console.log('=== HUMANIZATION COMPLETE ===');
-            console.log('Total changes made:', changes.length);
-            console.log('Final content length:', humanizedContent.length);
-            console.log('Final content preview:', humanizedContent.substring(0, 200));
+        }
+
+        function getPersonaPatterns(persona) {
+            // MASSIVELY expanded patterns - we need to be much more aggressive
+            const universalAIPatterns = [
+                // Basic AI word removal (now categorized properly)
+                { pattern: /\bleveraged\b/gi, replacement: 'used', type: 'AI removal' },
+                { pattern: /\bspearheaded\b/gi, replacement: 'led', type: 'AI removal' },
+                { pattern: /\butilized\b/gi, replacement: 'used', type: 'AI removal' },
+                { pattern: /\bfacilitated\b/gi, replacement: 'helped', type: 'AI removal' },
+                { pattern: /\bimplemented\b/gi, replacement: 'set up', type: 'AI removal' },
+                { pattern: /\bexecuted\b/gi, replacement: 'carried out', type: 'AI removal' },
+                { pattern: /\bdemonstrated\b/gi, replacement: 'showed', type: 'AI removal' },
+                { pattern: /\bcollaborated\b/gi, replacement: 'worked with', type: 'AI removal' },
+                { pattern: /\bcontributed\b/gi, replacement: 'helped', type: 'AI removal' },
+                { pattern: /\bparticipated\b/gi, replacement: 'took part in', type: 'AI removal' },
+                { pattern: /\bassisted\b/gi, replacement: 'helped', type: 'AI removal' },
+                { pattern: /\bmaintained\b/gi, replacement: 'kept up', type: 'AI removal' },
+                { pattern: /\bmonitored\b/gi, replacement: 'tracked', type: 'AI removal' },
+                { pattern: /\bensured\b/gi, replacement: 'made sure', type: 'AI removal' },
+                { pattern: /\banalyzed\b/gi, replacement: 'looked at', type: 'AI removal' },
+                { pattern: /\bevaluated\b/gi, replacement: 'reviewed', type: 'AI removal' },
+                { pattern: /\bcoordinated\b/gi, replacement: 'organized', type: 'AI removal' },
+                { pattern: /\bestablished\b/gi, replacement: 'set up', type: 'AI removal' },
+                { pattern: /\bconducted\b/gi, replacement: 'ran', type: 'AI removal' },
+                { pattern: /\bperformed\b/gi, replacement: 'did', type: 'AI removal' },
+                { pattern: /\baccomplished\b/gi, replacement: 'got done', type: 'AI removal' },
+                { pattern: /\bachieved\b/gi, replacement: 'reached', type: 'AI removal' },
+                
+                // Phrase improvements (universal)
+                { pattern: /proven track record/gi, replacement: 'solid experience', type: 'Phrase improvement' },
+                { pattern: /cutting-edge/gi, replacement: 'latest', type: 'Phrase improvement' },
+                { pattern: /state-of-the-art/gi, replacement: 'top-notch', type: 'Phrase improvement' },
+                { pattern: /best practices/gi, replacement: 'proven methods', type: 'Phrase improvement' },
+                { pattern: /actionable insights/gi, replacement: 'useful findings', type: 'Phrase improvement' },
+                { pattern: /strategic initiatives/gi, replacement: 'key projects', type: 'Phrase improvement' },
+                { pattern: /comprehensive analysis/gi, replacement: 'thorough review', type: 'Phrase improvement' },
+                { pattern: /robust methodology/gi, replacement: 'solid approach', type: 'Phrase improvement' },
+                { pattern: /scalable solutions/gi, replacement: 'flexible solutions', type: 'Phrase improvement' },
+                { pattern: /innovative approaches/gi, replacement: 'creative methods', type: 'Phrase improvement' },
+                { pattern: /dynamic environment/gi, replacement: 'fast-moving workplace', type: 'Phrase improvement' },
+                { pattern: /synergistic collaboration/gi, replacement: 'great teamwork', type: 'Phrase improvement' },
+                { pattern: /pivotal role/gi, replacement: 'key role', type: 'Phrase improvement' },
+                { pattern: /instrumental in/gi, replacement: 'key to', type: 'Phrase improvement' },
+                { pattern: /proactive approach/gi, replacement: 'staying ahead', type: 'Phrase improvement' },
+                { pattern: /core competencies/gi, replacement: 'main skills', type: 'Phrase improvement' },
+                { pattern: /value proposition/gi, replacement: 'what I bring', type: 'Phrase improvement' },
+                { pattern: /thought leadership/gi, replacement: 'industry expertise', type: 'Phrase improvement' },
+                { pattern: /mission-critical/gi, replacement: 'essential', type: 'Phrase improvement' },
+                { pattern: /end-to-end/gi, replacement: 'complete', type: 'Phrase improvement' },
+                
+                // Natural flow improvements (universal)
+                { pattern: /Furthermore,/gi, replacement: 'Also,', type: 'Natural flow' },
+                { pattern: /Moreover,/gi, replacement: 'Plus,', type: 'Natural flow' },
+                { pattern: /Additionally,/gi, replacement: 'Also,', type: 'Natural flow' },
+                { pattern: /Nevertheless,/gi, replacement: 'However,', type: 'Natural flow' },
+                { pattern: /Subsequently,/gi, replacement: 'Then,', type: 'Natural flow' },
+                { pattern: /; therefore,/gi, replacement: ', so', type: 'Natural flow' },
+                { pattern: /; however,/gi, replacement: ', but', type: 'Natural flow' },
+                { pattern: /; furthermore,/gi, replacement: ', and', type: 'Natural flow' },
+                { pattern: /\. Consequently,/gi, replacement: '. So', type: 'Natural flow' },
+                { pattern: /In order to/gi, replacement: 'To', type: 'Natural flow' },
+                { pattern: /With regard to/gi, replacement: 'About', type: 'Natural flow' },
+                { pattern: /In addition to/gi, replacement: 'Besides', type: 'Natural flow' },
+                { pattern: /As a result of/gi, replacement: 'Because of', type: 'Natural flow' },
+                { pattern: /Due to the fact that/gi, replacement: 'Since', type: 'Natural flow' },
+                { pattern: /It should be noted that/gi, replacement: '', type: 'Natural flow' },
+                { pattern: /It is important to mention/gi, replacement: '', type: 'Natural flow' }
+            ];
+
+            const personaSpecific = {
+                'finance': [
+                    // Finance bro aggressive language
+                    { pattern: /\boptimized\b/gi, replacement: 'crushed', type: 'Finance voice' },
+                    { pattern: /\benhanced\b/gi, replacement: 'pumped up', type: 'Finance voice' },
+                    { pattern: /\bstreamlined\b/gi, replacement: 'trimmed the fat on', type: 'Finance voice' },
+                    { pattern: /\bmaximized\b/gi, replacement: 'squeezed every penny from', type: 'Finance voice' },
+                    { pattern: /\bimproved\b/gi, replacement: 'boosted', type: 'Finance voice' },
+                    { pattern: /\bmanaged\b/gi, replacement: 'owned', type: 'Finance voice' },
+                    { pattern: /\bsupervised\b/gi, replacement: 'ran', type: 'Finance voice' },
+                    { pattern: /\bcoordinated\b/gi, replacement: 'locked down', type: 'Finance voice' },
+                    { pattern: /\banalyzed\b/gi, replacement: 'tore apart', type: 'Finance voice' },
+                    { pattern: /\bdeveloped\b/gi, replacement: 'built out', type: 'Finance voice' },
+                    { pattern: /\bcreated\b/gi, replacement: 'crafted', type: 'Finance voice' },
+                    { pattern: /\bworked with\b/gi, replacement: 'partnered with', type: 'Finance voice' },
+                    { pattern: /\bstakeholders\b/gi, replacement: 'the business', type: 'Finance voice' },
+                    { pattern: /\bcross-functional teams\b/gi, replacement: 'business partners', type: 'Finance voice' },
+                    { pattern: /\bdeliverables\b/gi, replacement: 'what we shipped', type: 'Finance voice' },
+                    { pattern: /\bresponsible for\b/gi, replacement: 'owned', type: 'Finance voice' },
+                    { pattern: /\breduced costs\b/gi, replacement: 'slashed expenses', type: 'Finance voice' },
+                    { pattern: /\bincreased revenue\b/gi, replacement: 'drove top-line growth', type: 'Finance voice' },
+                    { pattern: /\bbudget\b/gi, replacement: 'spend', type: 'Finance voice' },
+                    { pattern: /\bfinancial analysis\b/gi, replacement: 'number crunching', type: 'Finance voice' },
+                    { pattern: /\bperformance\b/gi, replacement: 'numbers', type: 'Finance voice' },
+                    { pattern: /\bresults\b/gi, replacement: 'the bottom line', type: 'Finance voice' },
+                    { pattern: /\bROI\b/gi, replacement: 'bang for buck', type: 'Finance voice' },
+                    { pattern: /\bmetrics\b/gi, replacement: 'KPIs', type: 'Finance voice' },
+                    { pattern: /\bgoals\b/gi, replacement: 'targets', type: 'Finance voice' },
+                    { pattern: /\bobjectives\b/gi, replacement: 'what we needed to hit', type: 'Finance voice' },
+                    { pattern: /\bstrategy\b/gi, replacement: 'game plan', type: 'Finance voice' },
+                    { pattern: /\binitiatives\b/gi, replacement: 'plays', type: 'Finance voice' },
+                    { pattern: /\bprojects\b/gi, replacement: 'deals', type: 'Finance voice' },
+                    { pattern: /\bsolutions\b/gi, replacement: 'moves', type: 'Finance voice' }
+                ],
+                
+                'data': [
+                    // Data nerd technical but accessible language
+                    { pattern: /\boptimized\b/gi, replacement: 'fine-tuned', type: 'Data voice' },
+                    { pattern: /\benhanced\b/gi, replacement: 'leveled up', type: 'Data voice' },
+                    { pattern: /\bstreamlined\b/gi, replacement: 'automated away', type: 'Data voice' },
+                    { pattern: /\bimproved\b/gi, replacement: 'upgraded', type: 'Data voice' },
+                    { pattern: /\bmanaged\b/gi, replacement: 'wrangled', type: 'Data voice' },
+                    { pattern: /\banalyzed\b/gi, replacement: 'dug into', type: 'Data voice' },
+                    { pattern: /\bdeveloped\b/gi, replacement: 'built', type: 'Data voice' },
+                    { pattern: /\bcreated\b/gi, replacement: 'spun up', type: 'Data voice' },
+                    { pattern: /\bimplemented\b/gi, replacement: 'deployed', type: 'Data voice' },
+                    { pattern: /\bdesigned\b/gi, replacement: 'architected', type: 'Data voice' },
+                    { pattern: /\bworked with\b/gi, replacement: 'collaborated with', type: 'Data voice' },
+                    { pattern: /\bstakeholders\b/gi, replacement: 'end users', type: 'Data voice' },
+                    { pattern: /\bdata analysis\b/gi, replacement: 'data deep-dives', type: 'Data voice' },
+                    { pattern: /\bmachine learning\b/gi, replacement: 'ML magic', type: 'Data voice' },
+                    { pattern: /\bstatistical analysis\b/gi, replacement: 'stat crunching', type: 'Data voice' },
+                    { pattern: /\bdata visualization\b/gi, replacement: 'making data tell stories', type: 'Data voice' },
+                    { pattern: /\bdatabase\b/gi, replacement: 'data warehouse', type: 'Data voice' },
+                    { pattern: /\balgorithms\b/gi, replacement: 'models', type: 'Data voice' },
+                    { pattern: /\binsights\b/gi, replacement: 'what the data revealed', type: 'Data voice' },
+                    { pattern: /\bdashboards\b/gi, replacement: 'data viz', type: 'Data voice' },
+                    { pattern: /\breports\b/gi, replacement: 'data summaries', type: 'Data voice' },
+                    { pattern: /\bmetrics\b/gi, replacement: 'numbers that matter', type: 'Data voice' },
+                    { pattern: /\btrends\b/gi, replacement: 'patterns', type: 'Data voice' },
+                    { pattern: /\bperformance\b/gi, replacement: 'how things were running', type: 'Data voice' },
+                    { pattern: /\bpredictive modeling\b/gi, replacement: 'crystal ball stuff', type: 'Data voice' },
+                    { pattern: /\bA\/B testing\b/gi, replacement: 'split testing', type: 'Data voice' },
+                    { pattern: /\bbig data\b/gi, replacement: 'massive datasets', type: 'Data voice' },
+                    { pattern: /\bETL\b/gi, replacement: 'data pipelines', type: 'Data voice' },
+                    { pattern: /\bSQL\b/gi, replacement: 'database queries', type: 'Data voice' },
+                    { pattern: /\bPython\b/gi, replacement: 'Python scripting', type: 'Data voice' }
+                ],
+                
+                'seasoned': [
+                    // Seasoned professional - confident but measured
+                    { pattern: /\boptimized\b/gi, replacement: 'refined', type: 'Seasoned voice' },
+                    { pattern: /\benhanced\b/gi, replacement: 'strengthened', type: 'Seasoned voice' },
+                    { pattern: /\bstreamlined\b/gi, replacement: 'improved', type: 'Seasoned voice' },
+                    { pattern: /\bimproved\b/gi, replacement: 'advanced', type: 'Seasoned voice' },
+                    { pattern: /\bmanaged\b/gi, replacement: 'guided', type: 'Seasoned voice' },
+                    { pattern: /\bsupervised\b/gi, replacement: 'mentored', type: 'Seasoned voice' },
+                    { pattern: /\bcoordinated\b/gi, replacement: 'orchestrated', type: 'Seasoned voice' },
+                    { pattern: /\banalyzed\b/gi, replacement: 'assessed', type: 'Seasoned voice' },
+                    { pattern: /\bdeveloped\b/gi, replacement: 'cultivated', type: 'Seasoned voice' },
+                    { pattern: /\bcreated\b/gi, replacement: 'established', type: 'Seasoned voice' },
+                    { pattern: /\bimplemented\b/gi, replacement: 'introduced', type: 'Seasoned voice' },
+                    { pattern: /\bdesigned\b/gi, replacement: 'architected', type: 'Seasoned voice' },
+                    { pattern: /\bworked with\b/gi, replacement: 'partnered with', type: 'Seasoned voice' },
+                    { pattern: /\bstakeholders\b/gi, replacement: 'key partners', type: 'Seasoned voice' },
+                    { pattern: /\bcross-functional teams\b/gi, replacement: 'diverse groups', type: 'Seasoned voice' },
+                    { pattern: /\bdeliverables\b/gi, replacement: 'outcomes', type: 'Seasoned voice' },
+                    { pattern: /\bresponsible for\b/gi, replacement: 'accountable for', type: 'Seasoned voice' },
+                    { pattern: /\btrained\b/gi, replacement: 'developed talent in', type: 'Seasoned voice' },
+                    { pattern: /\bcoached\b/gi, replacement: 'mentored people on', type: 'Seasoned voice' },
+                    { pattern: /\bstrategy\b/gi, replacement: 'strategic vision', type: 'Seasoned voice' },
+                    { pattern: /\binitiatives\b/gi, replacement: 'strategic efforts', type: 'Seasoned voice' },
+                    { pattern: /\bprojects\b/gi, replacement: 'undertakings', type: 'Seasoned voice' },
+                    { pattern: /\bgoals\b/gi, replacement: 'strategic objectives', type: 'Seasoned voice' },
+                    { pattern: /\bresults\b/gi, replacement: 'achievements', type: 'Seasoned voice' },
+                    { pattern: /\bperformance\b/gi, replacement: 'organizational effectiveness', type: 'Seasoned voice' },
+                    { pattern: /\bchange management\b/gi, replacement: 'leading transitions', type: 'Seasoned voice' },
+                    { pattern: /\bprocess improvement\b/gi, replacement: 'operational excellence', type: 'Seasoned voice' },
+                    { pattern: /\bleadership\b/gi, replacement: 'executive leadership', type: 'Seasoned voice' },
+                    { pattern: /\bteams\b/gi, replacement: 'organizations', type: 'Seasoned voice' },
+                    { pattern: /\bexperience\b/gi, replacement: 'expertise', type: 'Seasoned voice' }
+                ],
+                
+                'associate': [
+                    // Associate level - eager, collaborative, learning
+                    { pattern: /\boptimized\b/gi, replacement: 'improved', type: 'Associate voice' },
+                    { pattern: /\benhanced\b/gi, replacement: 'helped make better', type: 'Associate voice' },
+                    { pattern: /\bstreamlined\b/gi, replacement: 'simplified', type: 'Associate voice' },
+                    { pattern: /\bimproved\b/gi, replacement: 'upgraded', type: 'Associate voice' },
+                    { pattern: /\bmanaged\b/gi, replacement: 'handled', type: 'Associate voice' },
+                    { pattern: /\bsupervised\b/gi, replacement: 'guided', type: 'Associate voice' },
+                    { pattern: /\bcoordinated\b/gi, replacement: 'organized', type: 'Associate voice' },
+                    { pattern: /\banalyzed\b/gi, replacement: 'reviewed', type: 'Associate voice' },
+                    { pattern: /\bdeveloped\b/gi, replacement: 'built out', type: 'Associate voice' },
+                    { pattern: /\bcreated\b/gi, replacement: 'put together', type: 'Associate voice' },
+                    { pattern: /\bimplemented\b/gi, replacement: 'rolled out', type: 'Associate voice' },
+                    { pattern: /\bdesigned\b/gi, replacement: 'mapped out', type: 'Associate voice' },
+                    { pattern: /\bworked with\b/gi, replacement: 'partnered with', type: 'Associate voice' },
+                    { pattern: /\bstakeholders\b/gi, replacement: 'team members', type: 'Associate voice' },
+                    { pattern: /\bcross-functional teams\b/gi, replacement: 'different departments', type: 'Associate voice' },
+                    { pattern: /\bdeliverables\b/gi, replacement: 'what I needed to complete', type: 'Associate voice' },
+                    { pattern: /\bresponsible for\b/gi, replacement: 'took ownership of', type: 'Associate voice' },
+                    { pattern: /\bcontributed to\b/gi, replacement: 'pitched in on', type: 'Associate voice' },
+                    { pattern: /\bassisted with\b/gi, replacement: 'helped out with', type: 'Associate voice' },
+                    { pattern: /\bdeveloped skills in\b/gi, replacement: 'learned how to', type: 'Associate voice' },
+                    { pattern: /\bgained experience\b/gi, replacement: 'got hands-on with', type: 'Associate voice' },
+                    { pattern: /\bworked closely with\b/gi, replacement: 'teamed up with', type: 'Associate voice' },
+                    { pattern: /\bsupported\b/gi, replacement: 'backed up', type: 'Associate voice' },
+                    { pattern: /\binitiatives\b/gi, replacement: 'projects', type: 'Associate voice' },
+                    { pattern: /\bstrategy\b/gi, replacement: 'approach', type: 'Associate voice' },
+                    { pattern: /\bgoals\b/gi, replacement: 'targets', type: 'Associate voice' },
+                    { pattern: /\bresults\b/gi, replacement: 'outcomes', type: 'Associate voice' },
+                    { pattern: /\bperformance\b/gi, replacement: 'how things went', type: 'Associate voice' },
+                    { pattern: /\btraining\b/gi, replacement: 'learning opportunities', type: 'Associate voice' },
+                    { pattern: /\bexperience\b/gi, replacement: 'background', type: 'Associate voice' }
+                ],
+                
+                'junior': [
+                    // Junior/entry level - enthusiastic, learning-focused
+                    { pattern: /\boptimized\b/gi, replacement: 'made better', type: 'Junior voice' },
+                    { pattern: /\benhanced\b/gi, replacement: 'improved', type: 'Junior voice' },
+                    { pattern: /\bstreamlined\b/gi, replacement: 'organized', type: 'Junior voice' },
+                    { pattern: /\bimproved\b/gi, replacement: 'helped make better', type: 'Junior voice' },
+                    { pattern: /\bmanaged\b/gi, replacement: 'took care of', type: 'Junior voice' },
+                    { pattern: /\bsupervised\b/gi, replacement: 'looked after', type: 'Junior voice' },
+                    { pattern: /\bcoordinated\b/gi, replacement: 'organized', type: 'Junior voice' },
+                    { pattern: /\banalyzed\b/gi, replacement: 'looked into', type: 'Junior voice' },
+                    { pattern: /\bdeveloped\b/gi, replacement: 'worked on', type: 'Junior voice' },
+                    { pattern: /\bcreated\b/gi, replacement: 'made', type: 'Junior voice' },
+                    { pattern: /\bimplemented\b/gi, replacement: 'put in place', type: 'Junior voice' },
+                    { pattern: /\bdesigned\b/gi, replacement: 'planned out', type: 'Junior voice' },
+                    { pattern: /\bworked with\b/gi, replacement: 'worked alongside', type: 'Junior voice' },
+                    { pattern: /\bstakeholders\b/gi, replacement: 'people I worked with', type: 'Junior voice' },
+                    { pattern: /\bcross-functional teams\b/gi, replacement: 'different teams', type: 'Junior voice' },
+                    { pattern: /\bdeliverables\b/gi, replacement: 'my tasks', type: 'Junior voice' },
+                    { pattern: /\bresponsible for\b/gi, replacement: 'in charge of', type: 'Junior voice' },
+                    { pattern: /\bresponsibilities included\b/gi, replacement: 'I was responsible for', type: 'Junior voice' },
+                    { pattern: /\bcontributed to\b/gi, replacement: 'helped with', type: 'Junior voice' },
+                    { pattern: /\bassisted in\b/gi, replacement: 'helped out on', type: 'Junior voice' },
+                    { pattern: /\blearned\b/gi, replacement: 'picked up', type: 'Junior voice' },
+                    { pattern: /\bdeveloped understanding\b/gi, replacement: 'figured out', type: 'Junior voice' },
+                    { pattern: /\bgained knowledge\b/gi, replacement: 'learned about', type: 'Junior voice' },
+                    { pattern: /\bworked on\b/gi, replacement: 'got to work on', type: 'Junior voice' },
+                    { pattern: /\binitiatives\b/gi, replacement: 'projects', type: 'Junior voice' },
+                    { pattern: /\bstrategy\b/gi, replacement: 'plan', type: 'Junior voice' },
+                    { pattern: /\bgoals\b/gi, replacement: 'what we wanted to achieve', type: 'Junior voice' },
+                    { pattern: /\bresults\b/gi, replacement: 'what happened', type: 'Junior voice' },
+                    { pattern: /\bperformance\b/gi, replacement: 'how I did', type: 'Junior voice' },
+                    { pattern: /\bentry-level position\b/gi, replacement: 'starting role', type: 'Junior voice' },
+                    { pattern: /\bprofessional development\b/gi, replacement: 'learning new skills', type: 'Junior voice' },
+                    { pattern: /\bexperience\b/gi, replacement: 'time spent', type: 'Junior voice' }
+                ]
+            };
+
+            // Combine universal patterns with persona-specific ones
+            const selectedPersona = personaSpecific[persona] || [];
+            return [...universalAIPatterns, ...selectedPersona];
         }
 
         function addTypos(content, count) {
-            console.log('=== ADDING TYPOS ===');
-            console.log('Target typo count:', count);
-            
             const typoPatterns = [
-                { from: /\band\b/gi, to: 'adn', original: 'and' },
-                { from: /\bthe\b/gi, to: 'teh', original: 'the' },
-                { from: /\bexperience\b/gi, to: 'experiance', original: 'experience' },
-                { from: /\bdevelopment\b/gi, to: 'developement', original: 'development' },
-                { from: /\bmanagement\b/gi, to: 'managment', original: 'management' },
-                { from: /\benvironment\b/gi, to: 'enviroment', original: 'environment' },
-                { from: /\bresponsible\b/gi, to: 'responsable', original: 'responsible' },
-                { from: /\bsuccessful\b/gi, to: 'successfull', original: 'successful' },
-                { from: /\bwith\b/gi, to: 'wtih', original: 'with' },
-                { from: /\btheir\b/gi, to: 'thier', original: 'their' }
+                { word: 'and', typo: 'adn' },
+                { word: 'the', typo: 'teh' },
+                { word: 'experience', typo: 'experiance' },
+                { word: 'management', typo: 'managment' },
+                { word: 'with', typo: 'wtih' },
+                { word: 'responsible', typo: 'responsable' },
+                { word: 'successful', typo: 'sucessful' },
+                { word: 'opportunity', typo: 'oportunity' },
+                { word: 'developed', typo: 'developped' },
+                { word: 'received', typo: 'recieved' },
+                { word: 'definitely', typo: 'definately' },
+                { word: 'separate', typo: 'seperate' },
+                { word: 'business', typo: 'buisness' },
+                { word: 'necessary', typo: 'neccessary' },
+                { word: 'analysis', typo: 'anaylsis' },
+                { word: 'through', typo: 'threw' },
+                { word: 'project', typo: 'projet' },
+                { word: 'team', typo: 'tema' },
+                { word: 'their', typo: 'thier' },
+                { word: 'been', typo: 'ben' },
+                { word: 'really', typo: 'realy' },
+                { word: 'organization', typo: 'organziation' },
+                { word: 'different', typo: 'diffrent' },
+                { word: 'because', typo: 'becuase' },
+                { word: 'process', typo: 'proces' },
+                { word: 'system', typo: 'sytem' },
+                { word: 'training', typo: 'trainng' },
+                { word: 'including', typo: 'includng' },
+                { word: 'customer', typo: 'costumer' },
+                { word: 'service', typo: 'serivce' },
+                { word: 'position', typo: 'postion' },
+                { word: 'working', typo: 'workign' },
+                { word: 'meeting', typo: 'meting' },
+                { word: 'budget', typo: 'budjet' },
+                { word: 'quality', typo: 'qulaity' }
             ];
 
             let result = content;
             let addedTypos = 0;
-
-            // Split content into sentences for safer typo placement
-            const sentences = result.split(/[.!?]+/);
-            const safeSentences = sentences.filter(sentence => {
-                const s = sentence.trim();
-                return s.length > 15 && 
-                       !s.includes('@') && 
-                       !s.includes('http') && 
-                       !s.match(/\d{4}/) && 
-                       !s.includes('|') &&
-                       !s.match(/^\s*[A-Z][a-z]+\s+[A-Z][a-z]+\s*$/);
-            });
-
-            console.log('Found', safeSentences.length, 'safe sentences for typos');
-
-            // Try to add typos
-            for (let attempt = 0; attempt < typoPatterns.length && addedTypos < count; attempt++) {
-                const typo = typoPatterns[attempt];
+            
+            // Shuffle the entire typo patterns array for true randomness
+            const shuffledPatterns = [...typoPatterns].sort(() => Math.random() - 0.5);
+            
+            // Try each pattern until we reach the desired count
+            for (let i = 0; i < shuffledPatterns.length && addedTypos < count; i++) {
+                const pattern = shuffledPatterns[i];
+                const regex = new RegExp('\\b' + pattern.word + '\\b', 'i');
                 
-                // Find sentences that contain this word
-                const matchingSentences = safeSentences.filter(sentence => typo.from.test(sentence));
-                
-                if (matchingSentences.length > 0) {
-                    // Pick a random matching sentence
-                    const targetSentence = matchingSentences[Math.floor(Math.random() * matchingSentences.length)];
-                    
-                    // Replace the first occurrence in this sentence
-                    const updatedSentence = targetSentence.replace(typo.from, typo.to);
-                    
-                    // Update the full content
-                    result = result.replace(targetSentence, updatedSentence);
-                    
+                if (regex.test(result)) {
+                    result = result.replace(regex, pattern.typo);
                     changes.push({
-                        before: typo.original,
-                        after: typo.to,
-                        type: 'Authenticity typo'
+                        before: pattern.word,
+                        after: pattern.typo,
+                        type: 'Minor typo'
                     });
-                    
                     addedTypos++;
-                    console.log(`Added typo ${addedTypos}: ${typo.original} -> ${typo.to}`);
                 }
             }
 
-            console.log('Successfully added', addedTypos, 'typos');
             return result;
         }
 
         function showResults() {
-            document.getElementById('processing').style.display = 'none';
-            document.getElementById('results').style.display = 'block';
-
-            // Show summary
-            const summary = document.getElementById('summary');
-            summary.innerHTML = `
-                <h4>📊 Humanization Summary</h4>
-                <p><strong>Total changes made:</strong> ${changes.length}</p>
-                <p><strong>AI phrases removed:</strong> ${changes.filter(c => c.type === 'AI phrase removal').length}</p>
-                <p><strong>Natural language improvements:</strong> ${changes.filter(c => c.type === 'Natural language').length}</p>
-                <p><strong>Authenticity typos added:</strong> ${changes.filter(c => c.type === 'Authenticity typo').length}</p>
-            `;
-
-            // Show original and humanized text previews
-            document.getElementById('originalText').textContent = originalContent;
-            document.getElementById('humanizedText').textContent = humanizedContent;
-
-            // Show changes
-            const changesList = document.getElementById('changesList');
-            changesList.innerHTML = changes.map(change => `
-                <div class="change-item">
-                    <strong>${change.type}:</strong><br>
-                    <span class="change-before">${change.before}</span> → 
-                    <span class="change-after">${change.after}</span>
-                </div>
-            `).join('');
-
-            // Enable download
-            document.getElementById('downloadBtn').addEventListener('click', downloadResume);
-        }
-
-        function showPreview(type) {
-            // Update tab active states
-            document.querySelectorAll('.preview-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelectorAll('.preview-content').forEach(content => {
-                content.classList.remove('active');
-            });
-
-            // Show selected preview
-            if (type === 'original') {
-                document.querySelector('.preview-tab:first-child').classList.add('active');
-                document.getElementById('originalPreview').classList.add('active');
-            } else {
-                document.querySelector('.preview-tab:last-child').classList.add('active');
-                document.getElementById('humanizedPreview').classList.add('active');
-            }
-        }
-
-        function downloadResume() {
-            if (!documentStructure) {
-                alert('Error: Document structure not available for download');
-                return;
-            }
-
-            const originalFileName = uploadedFile.name;
-            const fileExtension = originalFileName.split('.').pop().toLowerCase();
-            const baseName = originalFileName.replace(/\.[^/.]+$/, '');
-
-            switch (documentStructure.type) {
-                case 'text':
-                    downloadAsText(baseName, fileExtension);
-                    break;
-                case 'docx':
-                    downloadAsDocx(baseName);
-                    break;
-                case 'excel':
-                    downloadAsExcel(baseName, fileExtension);
-                    break;
-                case 'pdf':
-                    downloadAsPdf(baseName);
-                    break;
-                default:
-                    downloadAsText(baseName, 'txt');
-            }
-        }
-
-        function downloadAsText(baseName, extension) {
-            const blob = new Blob([humanizedContent], { type: 'text/plain' });
-            downloadBlob(blob, `${baseName}_humanized.${extension}`);
-        }
-
-        function downloadAsDocx(baseName) {
             try {
-                // Create a new document with the humanized content
-                // Note: This is a simplified version. For full Word format preservation,
-                // you'd need a more sophisticated library or server-side processing
-                
-                const doc = new docx.Document({
-                    sections: [{
-                        properties: {},
-                        children: humanizedContent.split('\n\n').map(paragraph => 
-                            new docx.Paragraph({
-                                children: [new docx.TextRun(paragraph)]
-                            })
-                        )
-                    }]
-                });
+                document.getElementById('processing').style.display = 'none';
+                document.getElementById('results').style.display = 'block';
 
-                docx.Packer.toBlob(doc).then(blob => {
-                    downloadBlob(blob, `${baseName}_humanized.docx`);
-                }).catch(err => {
-                    console.error('Error creating Word document:', err);
-                    // Fallback to text download
-                    downloadAsText(baseName, 'txt');
-                });
-            } catch (err) {
-                console.error('Error with Word document creation:', err);
-                downloadAsText(baseName, 'txt');
+                const summary = document.getElementById('summary');
+                summary.innerHTML = '<h4>📊 Analysis Results</h4>' +
+                    '<p><strong>Total changes made:</strong> ' + changes.length + '</p>' +
+                    '<p><strong>Phrases improved:</strong> ' + changes.filter(function(c) { return c.type.includes('voice') || c.type.includes('language') || c.type === 'Phrase improvement'; }).length + '</p>' +
+                    '<p><strong>Flow enhanced:</strong> ' + changes.filter(function(c) { return c.type === 'Natural flow'; }).length + '</p>' +
+                    '<p><strong>Typos added:</strong> ' + changes.filter(function(c) { return c.type === 'Minor typo'; }).length + '</p>';
+
+                document.getElementById('humanizedText').textContent = humanizedContent || 'No content to display';
+
+                const changesList = document.getElementById('changesList');
+                let changesHTML = '';
+                if (changes.length > 0) {
+                    changes.forEach(function(change) {
+                        changesHTML += '<div class="change-item">' +
+                            '<div class="change-type">' + change.type + '</div>' +
+                            '<div><span class="change-before">' + change.before + '</span> → ' +
+                            '<span class="change-after">' + change.after + '</span></div>' +
+                            '</div>';
+                    });
+                } else {
+                    changesHTML = '<p>No changes needed - your resume looks good!</p>';
+                }
+                changesList.innerHTML = changesHTML;
+
+                // Add copy button functionality
+                const copyBtn = document.getElementById('copyBtn');
+                copyBtn.removeEventListener('click', copyHandler);
+                copyBtn.addEventListener('click', copyHandler);
+                
+                // Add retry button functionality
+                const retryBtn = document.getElementById('retryBtn');
+                retryBtn.removeEventListener('click', retryHandler);
+                retryBtn.addEventListener('click', retryHandler);
+            } catch (error) {
+                console.error('Error showing results:', error);
+                alert('There was an error displaying the results. Please try again.');
             }
         }
 
-        function downloadAsExcel(baseName, extension) {
-            try {
-                // Create new workbook with humanized content
-                const newWorkbook = XLSX.utils.book_new();
+        function retryHandler() {
+            if (originalContent) {
+                // Hide results and show processing again
+                document.getElementById('results').style.display = 'none';
+                document.getElementById('processing').style.display = 'block';
                 
-                // Convert humanized text back to sheet format
-                const lines = humanizedContent.split('\n').filter(line => line.trim());
-                const sheetData = lines.map(line => [line]);
-                
-                const newSheet = XLSX.utils.aoa_to_sheet(sheetData);
-                XLSX.utils.book_append_sheet(newWorkbook, newSheet, 'Resume');
-                
-                // Write to binary
-                const wbout = XLSX.write(newWorkbook, { bookType: extension, type: 'array' });
-                const blob = new Blob([wbout], { type: 'application/octet-stream' });
-                
-                downloadBlob(blob, `${baseName}_humanized.${extension}`);
-            } catch (err) {
-                console.error('Error creating Excel file:', err);
-                downloadAsText(baseName, 'txt');
-            }
-        }
-
-        function downloadAsPdf(baseName) {
-            try {
-                // Create new PDF with humanized content
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                
-                // Split content into lines that fit the page
-                const lines = doc.splitTextToSize(humanizedContent, 180);
-                let y = 20;
-                
-                lines.forEach(line => {
-                    if (y > 280) { // Start new page if needed
-                        doc.addPage();
-                        y = 20;
+                setTimeout(function() {
+                    try {
+                        humanizeContent();
+                        showResults();
+                    } catch (error) {
+                        console.error('Error during retry:', error);
+                        alert('There was an error processing your resume. Please try again.');
+                        document.getElementById('processing').style.display = 'none';
+                        document.getElementById('results').style.display = 'block';
                     }
-                    doc.text(line, 20, y);
-                    y += 7;
-                });
-                
-                // Download the PDF
-                doc.save(`${baseName}_humanized.pdf`);
-            } catch (err) {
-                console.error('Error creating PDF:', err);
-                downloadAsText(baseName, 'txt');
+                }, 1000);
             }
         }
 
-        function downloadBlob(blob, filename) {
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+        function copyHandler() {
+            if (humanizedContent) {
+                navigator.clipboard.writeText(humanizedContent).then(function() {
+                    const btn = document.getElementById('copyBtn');
+                    const originalText = btn.textContent;
+                    btn.textContent = '✅ Copied!';
+                    setTimeout(function() {
+                        btn.textContent = originalText;
+                    }, 2000);
+                }).catch(function() {
+                    alert('Please select and copy the text manually');
+                });
+            }
         }
     </script>
 </body>
